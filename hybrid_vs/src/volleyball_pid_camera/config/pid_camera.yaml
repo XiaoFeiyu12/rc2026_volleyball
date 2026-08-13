@@ -1,0 +1,7 @@
+pid_camera_node:
+  ros__parameters:
+    model_path: "model/volleyball_yolov11n_int8/best.xml"
+    confidence_threshold: 0.7
+    NMS_threshold: 0.5
+    usb_cam_topic: "/usb_cam/image_raw"
+    debug: false

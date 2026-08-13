@@ -1,0 +1,2 @@
+from urdf2webots.importer import convertUrdfFile	#导入convertUrdfFile这个库
+convertUrdfFile(input = '/home/xiaofeiyu/VolleyballRobot/src/webots_sim/protos/urdf/delta_arm.urdf',output='/home/xiaofeiyu/VolleyballRobot/src/webots_sim/protos/delta_arm.proto')

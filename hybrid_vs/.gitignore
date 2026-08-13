@@ -1,0 +1,67 @@
+#============================
+# ROS2 / colcon 工作区通用
+#============================
+
+#colcon 默认输出目录
+build/
+install/
+log/
+
+#colcon/ament 可能生成在根目录的文件
+.colcon/
+compile_commands.json
+
+#运行时目录（ROS2 节点运行后常见）
+.ros/
+
+#ROS2 bag（数据很大，建议不要入库）
+bag/
+
+#============================
+# 通用编译/链接产物（防止误在源码目录里构建）
+#============================
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/CTestTestfile.cmake
+**/CPackConfig.cmake
+**/CPackSourceConfig.cmake
+**/*.o
+**/*.obj
+**/*.so
+**/*.so.*
+**/*.a
+**/*.dll
+**/*.dylib
+**/*.exe
+**/*.out
+
+#============================
+# 编辑器/临时文件（保留配置，不提交缓存）
+#============================
+.cache/
+.idea/
+
+*.swp
+*.swo
+*~
+
+#VS Code：保留 settings/launch 等配置，但忽略大数据库与缓存
+.vscode/browse.vc.db*
+.vscode/ipch/
+
+.claude
+
+#============================
+# Python
+#============================
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+#一些不想让人看到的东西
+# *git_workflow.md
+私人令牌.txt
+doc/
+*.mp4
