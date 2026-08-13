@@ -1,0 +1,72 @@
+# ===== 全局共享参数 =====
+/**:
+  ros__parameters:
+    k: 0.02           #空气阻力系数
+    m: 0.27           #排球质量，单位kg
+    g: 9.80           #重力加速度，单位m/s^2
+
+#检测节点
+detector_node:
+  ros__parameters:
+    model_path: "model/volleyball_v3_3_int8/best.xml"
+    model_confidence_threshold : 0.6
+    model_NMS_threshold : 0.45
+    depth_validation_threshold : 0.5
+    debug : true
+    camera_frame_id : "camera_color_optical_frame"
+    debug_frame_skip: 3
+
+#追踪节点
+tracker_node:
+  ros__parameters:
+    #过程噪声矩阵（自适应Q，低速大→跟测量，高速小→信任物理模型）
+    Q_sigma_xy_min: 3.0
+    Q_sigma_xy_max: 200.0
+    Q_sigma_z_min: 5.0
+    Q_sigma_z_max: 200.0
+    #测量噪声矩阵
+    sigma_pixel : 5
+    sigma_depth_gain : 0.007
+    sigma_depth_const : 0.02
+    #tracker各种时间阈值
+    detect_cnt_thres: 3
+    lost_time_thres: 0.5
+    selfcheck_time_thres: 0.05
+    #tf2
+    target_frame_id: "odom"
+
+#预测节点
+predict_node:
+  ros__parameters:
+    predict_timer_freq: 500  #Hz
+    predict_step: 0.02 #预测器步长，单位s
+    odom_frame_id: "odom"
+    lost_time_thres: 3.0 #丢检后预测时间阈值，超出后不再预测
+
+#规划节点
+planner_node:
+  ros__parameters:
+    base_to_armjoint: 0.18
+    armjoint_to_strikingpoint: 0.02
+    delta_arm_angle : 33.0 #delta机械臂工作方向与竖直方向夹角
+    # 落点统计参数
+    landing_buffer_size: 50       # 缓冲区最大样本数
+    landing_time_window: 0.4      # 样本有效时间窗口（秒）
+    coarse_std_threshold: 0.2     # 切换到 FINE 的标准差阈值（米）
+    min_samples_for_output: 3     # 最少样本数才开始输出
+    data_timeout: 1.5             # 无新数据超时清空缓冲区（秒）
+    # 静止检测参数（球被人抱在手上时，轨迹初末位置XY距离很小且持续一段时间，跳过规划）
+    stationary_xy_threshold: 0.3   # 轨迹初末位置 XY 距离阈值（米），小于此值认为球未移动
+    stationary_time_threshold: 0.5 # 连续静止持续时间阈值（秒），超过此值确认球静止
+
+#串口节点
+serial_driver_node:
+  ros__parameters:
+    timestamp_offset: 0.005
+    device_name: "/dev/ttyACM0"
+    baud_rate: 115200
+    odom_frame_id: "odom"
+    base_link_frame_id: "base_link"
+    # 下位机→上位机坐标系转换参数,单位deg度
+    # 下位机: x右 y前, 上位机: x前 y右
+    odom2base_rpy: [0.0, 0.0, 90.0]

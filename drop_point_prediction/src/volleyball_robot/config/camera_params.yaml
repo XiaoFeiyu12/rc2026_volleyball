@@ -1,0 +1,14 @@
+realsense: #这里的参数优先级高于.json文件的
+  enable_color : true
+  enable_depth : true
+  enable_infra1: false
+  enable_infra2: false
+  enable_sync : true
+  align_depth.enable: false
+  enable_rgbd : false
+  rgb_camera.color_profile : "848x480x60"
+  rgb_camera.enable_auto_exposure: false
+  depth_module.depth_profile : "848x480x60"
+  depth_module.enable_auto_exposure: false
+  publish_tf: true
+  json_file_path: "config/realsense_config.json"

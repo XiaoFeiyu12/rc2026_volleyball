@@ -1,0 +1,41 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${workspaceFolder}/.vscode/browse.vc.db",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/opt/ros/humble/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_detect/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_ibvs/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_pid_camera/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_plan/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_predict/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_serial_driver/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionOne_DropPointPrediction/src/volleyball_track/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_detect/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_ibvs/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_pid_camera/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_plan/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_predict/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_serial_driver/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionThree_HybridVS/src/volleyball_track/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_detect/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_ibvs/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_pid_camera/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_plan/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_predict/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_serial_driver/include/**",
+        "/home/xiaofeiyu/2026-robocon-volleyball-robot/OptionTwo_IBVS/src/volleyball_track/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ros2",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++17"
+    }
+  ],
+  "version": 4
+}

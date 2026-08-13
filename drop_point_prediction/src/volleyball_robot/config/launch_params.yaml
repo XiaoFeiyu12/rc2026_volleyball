@@ -1,0 +1,36 @@
+is_to_launch:
+  realsense_camera: true
+  robot_description: true
+  detector_node: true
+  tracker_node: false
+  predict_node: false
+  planner_node: false
+  serial_driver_node: true
+  rviz: false
+  foxglove_node: true
+  foxglove_port: 8765
+  mock_odom: false #模拟里程计（无下位机时测试使用）
+
+info_level:
+  detector_node: DEBUG
+  tracker_node: INFO
+  predict_node: INFO
+  planner_node: INFO
+  serial_driver_node: DEBUG
+
+robot_description:
+  delta_arm:
+    xyz: "\"0.051 0 0.191\""
+    rpy: "\"-3.1416 0 0\""
+
+  #相机目前基于base_link设置
+  camera:
+    xyz: "\"0.09829 0.01752 0.39951\""
+    rpy: "\"0 -1.120796 0\""
+
+  #击打点：目前击打点基于base_link设置
+  strike_point: 
+    xyz: "\"0.09829 0 0.39951\""
+    rpy: "\"0 -1.120796 0\""
+
+
