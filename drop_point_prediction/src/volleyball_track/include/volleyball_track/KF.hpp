@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file KF.hpp
- * @brief 卡尔曼滤波器基类与实现（EKF+UKF），用于排球状态估计
+ * @brief 卡尔曼滤波器基类与实现（Ekf+Ukf），用于排球状态估计
  *******************************************************************************/
 
 #ifndef KF_HPP
@@ -31,12 +31,12 @@ public:
 };
 
 /****************************************************************
- * @class EKF 扩展卡尔曼滤波器
+ * @class Ekf 扩展卡尔曼滤波器
  ****************************************************************/
-class EKF : public KalmanFilterBase
+class Ekf : public KalmanFilterBase
 {
 public:
-	EKF(const Eigen::MatrixXd &P0, ProcessModel pm, MeasureModel mm);
+	Ekf(const Eigen::MatrixXd &P0, ProcessModel pm, MeasureModel mm);
 	void set_state(const Eigen::VectorXd &x0) override;
 	Eigen::VectorXd get_state() override { return x_post_; }
 	Eigen::VectorXd predict(double dt) override;
@@ -56,12 +56,12 @@ private:
 };
 
 /****************************************************************
- * @class UKF 无迹卡尔曼滤波器
+ * @class Ukf 无迹卡尔曼滤波器
  ****************************************************************/
-class UKF : public KalmanFilterBase
+class Ukf : public KalmanFilterBase
 {
 public:
-	UKF(double alpha, double kappa, double beta, int n, int m, const Eigen::MatrixXd &P0, ProcessModel pm,
+	Ukf(double alpha, double kappa, double beta, int n, int m, const Eigen::MatrixXd &P0, ProcessModel pm,
 		MeasureModel mm);
 	void set_state(const Eigen::VectorXd &x0) override;
 	Eigen::VectorXd get_state() override { return x_post_; }

@@ -2,12 +2,12 @@
 
 ## 概述
 
-`volleyball_track` 负责对检测到的排球位置进行**滤波平滑与状态估计**。它实现了**扩展卡尔曼滤波（EKF）**，基于带线性空气阻力的物理运动模型预测排球位置与速度，并利用检测值进行修正，从而抑制检测跳变、填补短暂丢帧，输出稳定的排球运动状态。
+`volleyball_track` 负责对检测到的排球位置进行**滤波平滑与状态估计**。它实现了**扩展卡尔曼滤波（Ekf）**，基于带线性空气阻力的物理运动模型预测排球位置与速度，并利用检测值进行修正，从而抑制检测跳变、填补短暂丢帧，输出稳定的排球运动状态。
 
 ## 架构
 
 ```
-/detector/ball (检测) → 坐标系变换(TF2) → EKF 滤波 → /tracker/target (追踪)
+/detector/ball (检测) → 坐标系变换(TF2) → Ekf 滤波 → /tracker/target (追踪)
                           ↓                        ↓
                   丢检自检定时器              RViz 可视化 Marker
 ```
@@ -23,7 +23,7 @@ DETECTING ──(积累 detect_cnt_tres 帧)──→ TRACKING ──(检测到�
 ```
 
 1. **`DETECTING`（检测确认阶段）**: 接收到检测帧后计数，累积超过 `detect_cnt_tres` 帧后初始化滤波器并进入 `TRACKING`
-2. **`TRACKING`（正常跟踪阶段）**: 每收到检测帧执行 ①预测 (`EKF::predict`) → ②更新 (`EKF::update`)
+2. **`TRACKING`（正常跟踪阶段）**: 每收到检测帧执行 ①预测 (`Ekf::predict`) → ②更新 (`Ekf::update`)
 3. **`LOST`（丢检阶段）**: 当超过 `lost_time` 秒未收到检测数据，进入丢失状态。恢复检测后重新初始化滤波器
 
 ## 节点
@@ -78,7 +78,7 @@ DETECTING ──(积累 detect_cnt_tres 帧)──→ TRACKING ──(检测到�
 - `predict_only()`: 检测丢失时纯外推，累计超过阈值切至 `LOST`
 - `reset()`: 手动复位至 `DETECTING`
 
-### `EKF` — 扩展卡尔曼滤波器
+### `Ekf` — 扩展卡尔曼滤波器
 
 位于 `include/volleyball_track/KF.hpp`
 
@@ -117,7 +117,7 @@ vz(t+Δt) = φ·vz(t) - g·η
 - `Position3D`: 观测直接映射到状态的位置分量 `z = [px, py, pz]ᵀ`
 - 测量噪声矩阵 `R = diag(σx², σy², σz²)`
 
-### `UKF` — 无迹卡尔曼滤波器
+### `Ukf` — 无迹卡尔曼滤波器
 
 虽已实现但**未在默认配置中使用**，支持任意非线性过程/观测模型。
 

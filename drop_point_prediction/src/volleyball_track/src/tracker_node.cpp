@@ -73,7 +73,7 @@ void TrackerNode::try_init_kf()
 	auto mm = make_position_3d(sigma_pixel, sigma_depth_gain, sigma_depth_const, fx_, fy_, mm_ctx);
 	auto pm = make_linear_drag_3d(Q_sigma_xy_min, Q_sigma_xy_max, Q_sigma_z_min, Q_sigma_z_max, k, m, g);
 	Eigen::MatrixXd P0 = Eigen::MatrixXd::Identity(6, 6);
-	auto ekf = std::make_unique<EKF>(P0, std::move(pm), std::move(mm));
+	auto ekf = std::make_unique<Ekf>(P0, std::move(pm), std::move(mm));
 	tracker_ = std::make_unique<Tracker>(std::move(ekf), detect_cnt_thres, lost_time_thres);
 	kf_initialized_ = true;
 
@@ -189,7 +189,7 @@ void TrackerNode::ball_callback(const volleyball_interfaces::msg::Ball::SharedPt
 }
 
 /*****************************************************************
- * @brief 丢检自检定时回调：超阈值且非 IDLE 时 EKF 外推并发布
+ * @brief 丢检自检定时回调：超阈值且非 IDLE 时 Ekf 外推并发布
  *****************************************************************/
 void TrackerNode::ball_lost_selfcheck_timer_callback()
 {

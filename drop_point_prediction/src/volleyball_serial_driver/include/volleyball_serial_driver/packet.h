@@ -12,7 +12,7 @@
 #pragma pack(1)
 
 /*******************************************************************************
- * @struct robotMsg
+ * @struct RobotMsg
  * @brief 机器人状态数据包结构体（下位机→上位机）
  * @param header 帧头(0xAA)
  * @param mode 机器人当前运动模式
@@ -31,10 +31,10 @@ typedef struct _robot_msg_
 	float self_yaw;
 	uint8_t my_xor;
 	uint8_t tail;
-} robotMsg;
+} RobotMsg;
 
 /*******************************************************************************
- * @struct planMsg
+ * @struct PlanMsg
  * @brief 规划指令数据包结构体（上位机→下位机）
  * @param header 帧头(0xAA)
  * @param cmd 指令类型
@@ -57,26 +57,26 @@ typedef struct _plan_msg_
 	float landing_time;
 	uint8_t my_xor;
 	uint8_t tail;
-} planMsg;
+} PlanMsg;
 
 /*******************************************************************************
- * @union robotArray
+ * @union RobotArray
  * @brief 机器人状态数据包联合体，用于字节流与结构体转换
  *******************************************************************************/
-union robotArray
+union RobotArray
 {
-	robotMsg msg;
-	uint8_t array[sizeof(robotMsg)];
+	RobotMsg msg;
+	uint8_t array[sizeof(RobotMsg)];
 };
 
 /*******************************************************************************
- * @union planArray
+ * @union PlanArray
  * @brief 规划指令数据包联合体，用于字节流与结构体转换
  *******************************************************************************/
-union planArray
+union PlanArray
 {
-	planMsg msg;
-	uint8_t array[sizeof(planMsg)];
+	PlanMsg msg;
+	uint8_t array[sizeof(PlanMsg)];
 };
 
 #pragma pack()

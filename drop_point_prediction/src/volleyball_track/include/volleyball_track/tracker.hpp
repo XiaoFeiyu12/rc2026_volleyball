@@ -19,7 +19,7 @@ namespace volleyball
 
 /****************************************************************
  * @class Tracker 排球跟踪器类
- * @brief 单目标 EKF 跟踪器，状态机：IDLE → DETECTING → TRACKING ↔ TEMP_LOST
+ * @brief 单目标 Ekf 跟踪器，状态机：IDLE → DETECTING → TRACKING ↔ TEMP_LOST
  *
  *   ┌──────────┐
  *   │   IDLE   │◄──── 连续丢失 > lost_time_thres ──────┐
@@ -46,7 +46,7 @@ public:
 		STATE_IDLE,		  // 无目标
 		STATE_DETECTING,  // 检测确认中（防 YOLO 误检）
 		STATE_TRACKING,	  // 正常跟踪
-		STATE_TEMP_LOST	  // 短暂丢失，EKF 外推中
+		STATE_TEMP_LOST	  // 短暂丢失，Ekf 外推中
 	} TrackState;
 
 	Tracker(std::unique_ptr<KalmanFilterBase> KF, int detect_thres, double lost_time_thres);

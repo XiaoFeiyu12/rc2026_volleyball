@@ -23,14 +23,14 @@ using namespace drivers::serial_driver;
 using namespace std::chrono_literals;
 
 /*******************************************************************************
- * @class serial_driver_node
+ * @class SerialDriverNode
  * @brief 串口驱动节点，负责收发下位机数据并发布ROS消息
  *******************************************************************************/
-class serial_driver_node : public rclcpp::Node
+class SerialDriverNode : public rclcpp::Node
 {
 public:
-	serial_driver_node(std::string node_name);	// 构造函数，初始化串口参数与ROS组件
-	~serial_driver_node();						// 析构函数，关闭串口释放内存
+	SerialDriverNode(std::string node_name);	// 构造函数，初始化串口参数与ROS组件
+	~SerialDriverNode();						// 析构函数，关闭串口释放内存
 
 private:
 	void serial_reopen_callback();										  // 串口断线重连回调（1Hz定时触发）
@@ -83,8 +83,8 @@ private:
 	uint8_t last_mode_ = 0;	 // 上一次下位机模式，用于检测模式切换
 
 	// 数据包联合体指针，用于串口字节流与结构体的转换
-	robotArray *robotArray_ptr;
-	planArray *planArray_ptr;
+	RobotArray *robotArray_ptr;
+	PlanArray *planArray_ptr;
 };
 
 #endif	// VOLLEYBALL_SERIAL_DRIVER_HPP

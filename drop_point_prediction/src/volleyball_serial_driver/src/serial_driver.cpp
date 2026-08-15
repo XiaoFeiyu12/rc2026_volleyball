@@ -8,8 +8,8 @@
 /*****************************************************************
  * @brief 构造函数：初始化串口参数、ROS发布订阅、TF广播及读取线程
  *****************************************************************/
-serial_driver_node::serial_driver_node(std::string node_name)
-	: rclcpp::Node(node_name), ctx{IoContext(2)}, robotArray_ptr{new robotArray}, planArray_ptr{new planArray}
+SerialDriverNode::SerialDriverNode(std::string node_name)
+	: rclcpp::Node(node_name), ctx{IoContext(2)}, robotArray_ptr{new RobotArray}, planArray_ptr{new PlanArray}
 {
 	// 获取参数
 	dev_name = new std::string(this->declare_parameter<std::string>("device_name", "/dev/ttyACM"));
@@ -25,14 +25,14 @@ serial_driver_node::serial_driver_node(std::string node_name)
 	portConfig = new SerialPortConfig(baud_rate, FlowControl::NONE, Parity::NONE, StopBits::ONE);
 
 	// 清零数据缓冲区
-	memset(robotArray_ptr->array, 0, sizeof(robotArray));
-	memset(planArray_ptr->array, 0, sizeof(planArray));
+	memset(robotArray_ptr->array, 0, sizeof(RobotArray));
+	memset(planArray_ptr->array, 0, sizeof(PlanArray));
 
 	// 串口重启定时器（1Hz）
-	reopenTimer = this->create_wall_timer(1s, std::bind(&serial_driver_node::serial_reopen_callback, this));
+	reopenTimer = this->create_wall_timer(1s, std::bind(&SerialDriverNode::serial_reopen_callback, this));
 
 	// 发布定时器（500Hz）
-	publishTimer = this->create_wall_timer(10ms, std::bind(&serial_driver_node::robot_callback, this));
+	publishTimer = this->create_wall_timer(10ms, std::bind(&SerialDriverNode::robot_callback, this));
 
 	// TF广播器
 	tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -48,17 +48,17 @@ serial_driver_node::serial_driver_node(std::string node_name)
 	// 订阅规划消息
 	plan_sub_ = this->create_subscription<volleyball_interfaces::msg::Plan>(
 		"/planner/plan", rclcpp::SensorDataQoS(),
-		std::bind(&serial_driver_node::plan_callback, this, std::placeholders::_1));
+		std::bind(&SerialDriverNode::plan_callback, this, std::placeholders::_1));
 	// 订阅 /detector/ball 获取 Realsense 深度
 	ball_sub_ = this->create_subscription<volleyball_interfaces::msg::Ball>(
 		"/detector/ball", rclcpp::SensorDataQoS(),
-		std::bind(&serial_driver_node::ball_callback, this, std::placeholders::_1));
+		std::bind(&SerialDriverNode::ball_callback, this, std::placeholders::_1));
 
 	// 串口写入定时器（500Hz）
-	writeTimer = this->create_wall_timer(2ms, std::bind(&serial_driver_node::serial_write_callback, this));
+	writeTimer = this->create_wall_timer(2ms, std::bind(&SerialDriverNode::serial_write_callback, this));
 
 	// 启动串口读取线程
-	serialReadThread = std::thread(&serial_driver_node::serial_read_thread, this);
+	serialReadThread = std::thread(&SerialDriverNode::serial_read_thread, this);
 	serialReadThread.detach();
 
 	RCLCPP_INFO(get_logger(), "节点:/%s启动", node_name.c_str());
@@ -80,7 +80,7 @@ serial_driver_node::serial_driver_node(std::string node_name)
 /*****************************************************************
  * @brief 析构函数：关闭串口并释放动态内存
  *****************************************************************/
-serial_driver_node::~serial_driver_node()
+SerialDriverNode::~SerialDriverNode()
 {
 	if (serialDriver.port()->is_open())
 	{
@@ -96,7 +96,7 @@ serial_driver_node::~serial_driver_node()
 /*****************************************************************
  * @brief 串口断线重连回调，定时检测串口状态并尝试重新打开
  *****************************************************************/
-void serial_driver_node::serial_reopen_callback()
+void SerialDriverNode::serial_reopen_callback()
 {
 	// 串口失效时尝试重启
 	if (!isOpen)
@@ -120,7 +120,7 @@ void serial_driver_node::serial_reopen_callback()
 /*****************************************************************
  * @brief 串口读取线程，循环接收并校验下位机数据包
  *****************************************************************/
-void serial_driver_node::serial_read_thread()
+void SerialDriverNode::serial_read_thread()
 {
 	while (rclcpp::ok())
 	{
@@ -140,7 +140,7 @@ void serial_driver_node::serial_read_thread()
 					uint8_t tail = robotData[robotData.size() - 1];
 					uint8_t myxor = robotData[robotData.size() - 2];
 
-					if (tail == 0x55 && myxor == serial_driver_node::get_content_xor(&robotData[1], robotData.size() - 3))
+					if (tail == 0x55 && myxor == SerialDriverNode::get_content_xor(&robotData[1], robotData.size() - 3))
 					{
 						memcpy(robotArray_ptr->array, robotData.data(), sizeof(robotArray_ptr->array));
 						isRead = true;
@@ -178,7 +178,7 @@ void serial_driver_node::serial_read_thread()
  * @param data 待发送数据指针
  * @param len 数据长度
  *****************************************************************/
-void serial_driver_node::serial_write(uint8_t *data, size_t len)
+void SerialDriverNode::serial_write(uint8_t *data, size_t len)
 {
 	std::vector<uint8_t> tempData(data, data + len);
 	try
@@ -196,7 +196,7 @@ void serial_driver_node::serial_write(uint8_t *data, size_t len)
 /*****************************************************************
  * @brief 串口写入定时回调（500Hz），检查规划指令并发送
  *****************************************************************/
-void serial_driver_node::serial_write_callback()
+void SerialDriverNode::serial_write_callback()
 {
 	if (isOpen && planArray_ptr != nullptr)
 	{
@@ -218,7 +218,7 @@ void serial_driver_node::serial_write_callback()
 /*****************************************************************
  * @brief 发布机器人位姿及TF的定时回调（500Hz）
  *****************************************************************/
-void serial_driver_node::robot_callback()
+void SerialDriverNode::robot_callback()
 {
 	if (isOpen && isRead)
 	{
@@ -288,20 +288,20 @@ void serial_driver_node::robot_callback()
 /*****************************************************************
  * @brief 规划消息订阅回调，将规划指令打包为下位机协议格式
  *****************************************************************/
-void serial_driver_node::plan_callback(volleyball_interfaces::msg::Plan::SharedPtr msg)
+void SerialDriverNode::plan_callback(volleyball_interfaces::msg::Plan::SharedPtr msg)
 {
 	latest_plan_ = *msg;
 	has_new_plan = true;
 }
 
-void serial_driver_node::ball_callback(volleyball_interfaces::msg::Ball::SharedPtr msg)
+void SerialDriverNode::ball_callback(volleyball_interfaces::msg::Ball::SharedPtr msg)
 {
 	// 使用 Ball.z（相机坐标系前方深度）作为深度判断依据
 	latest_ball_depth_ = msg->z;
 	has_ball_depth_ = true;
 }
 
-uint8_t serial_driver_node::get_content_xor(uint8_t *data_begin, int len)
+uint8_t SerialDriverNode::get_content_xor(uint8_t *data_begin, int len)
 {
 	uint8_t my_xor = 0;
 	while (len--)
@@ -314,7 +314,7 @@ uint8_t serial_driver_node::get_content_xor(uint8_t *data_begin, int len)
 int main(int argc, char *argv[])
 {
 	rclcpp::init(argc, argv);
-	std::shared_ptr<serial_driver_node> node = std::make_shared<serial_driver_node>("serial_driver_node");
+	std::shared_ptr<SerialDriverNode> node = std::make_shared<SerialDriverNode>("serial_driver_node");
 	rclcpp::spin(node);
 	rclcpp::shutdown();
 	return 0;

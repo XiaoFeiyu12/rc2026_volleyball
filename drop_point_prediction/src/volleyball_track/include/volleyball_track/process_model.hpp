@@ -15,7 +15,7 @@ namespace volleyball
 
 /****************************************************************
  * @struct ProcessModel 过程模型（匿名函数容器）
- *        jacobian_f 可为空（UKF不需要）
+ *        jacobian_f 可为空（Ukf不需要）
  ****************************************************************/
 struct ProcessModel
 {
@@ -209,7 +209,7 @@ inline ProcessModel make_linear_drag_3d(double q_sxy_min, double q_sxy_max, doub
 }
 
 /****************************************************************
- * @brief 三维非线性二次空气阻力模型（UKF用，无雅可比）
+ * @brief 三维非线性二次空气阻力模型（Ukf用，无雅可比）
  ****************************************************************/
 inline ProcessModel make_quadratic_drag_3d(double q_sxy_min, double q_sxy_max, double q_sz_min, double q_sz_max, double k,
 										double /*m*/, double g = 9.8)

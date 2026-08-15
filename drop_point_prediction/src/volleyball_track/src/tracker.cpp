@@ -34,7 +34,7 @@ void Tracker::update(const BallSharedPtr &ball_msg, double dt)
 	{
 	case STATE_IDLE:
 	{
-		// 首次检测，初始化 EKF 状态
+		// 首次检测，初始化 Ekf 状态
 		Eigen::VectorXd ball_state = Eigen::VectorXd::Zero(6);
 		ball_state << ball_msg->x, 0, ball_msg->y, 0, std::max(0.0, static_cast<double>(ball_msg->z)), 0;
 		KF_->set_state(ball_state);
@@ -79,7 +79,7 @@ void Tracker::update(const BallSharedPtr &ball_msg, double dt)
 }
 
 /*****************************************************************
- * @brief 无观测：EKF 外推，超时则退回 IDLE
+ * @brief 无观测：Ekf 外推，超时则退回 IDLE
  *****************************************************************/
 void Tracker::predict_only(double dt)
 {

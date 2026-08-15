@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @file KF.cpp
- * @brief 扩展卡尔曼滤波（EKF）与无迹卡尔曼滤波（UKF）实现
+ * @brief 扩展卡尔曼滤波（Ekf）与无迹卡尔曼滤波（Ukf）实现
  *******************************************************************************/
 
 #include "volleyball_track/KF.hpp"
@@ -10,9 +10,9 @@
 namespace volleyball
 {
 /*****************************************************************
- * @brief EKF构造函数：初始化状态与协方差
+ * @brief Ekf构造函数：初始化状态与协方差
  *****************************************************************/
-EKF::EKF(const Eigen::MatrixXd &P0, ProcessModel pm, MeasureModel mm)
+Ekf::Ekf(const Eigen::MatrixXd &P0, ProcessModel pm, MeasureModel mm)
 	: pm_(std::move(pm)),
 	  mm_(std::move(mm)),
 	  x_pred_(Eigen::VectorXd::Zero(6)),
@@ -23,18 +23,18 @@ EKF::EKF(const Eigen::MatrixXd &P0, ProcessModel pm, MeasureModel mm)
 }
 
 /*****************************************************************
- * @brief 设置EKF初始状态
+ * @brief 设置Ekf初始状态
  *****************************************************************/
-void EKF::set_state(const Eigen::VectorXd &x0)
+void Ekf::set_state(const Eigen::VectorXd &x0)
 {
 	x_post_ = x0;
 	x_pred_ = x_post_;
 }
 
 /*****************************************************************
- * @brief EKF预测步骤：线性化状态转移，预测先验状态与协方差
+ * @brief Ekf预测步骤：线性化状态转移，预测先验状态与协方差
  *****************************************************************/
-Eigen::VectorXd EKF::predict(double dt)
+Eigen::VectorXd Ekf::predict(double dt)
 {
 	// 更新雅可比矩阵与噪声矩阵
 	F_ = pm_.jacobian_f(x_post_, dt);
@@ -52,9 +52,9 @@ Eigen::VectorXd EKF::predict(double dt)
 }
 
 /*****************************************************************
- * @brief EKF更新步骤：利用观测修正先验状态
+ * @brief Ekf更新步骤：利用观测修正先验状态
  *****************************************************************/
-Eigen::VectorXd EKF::update(const Eigen::VectorXd &z)
+Eigen::VectorXd Ekf::update(const Eigen::VectorXd &z)
 {
 	// 更新观测雅可比与噪声矩阵
 	H_ = mm_.jacobian_h(x_pred_);
@@ -84,9 +84,9 @@ Eigen::VectorXd EKF::update(const Eigen::VectorXd &z)
 }
 
 /*****************************************************************
- * @brief UKF构造函数：初始化参数与Sigma点权重
+ * @brief Ukf构造函数：初始化参数与Sigma点权重
  *****************************************************************/
-UKF::UKF(double alpha, double kappa, double beta, int n, int m, const Eigen::MatrixXd &P0, ProcessModel pm,
+Ukf::Ukf(double alpha, double kappa, double beta, int n, int m, const Eigen::MatrixXd &P0, ProcessModel pm,
 		 MeasureModel mm)
 	: pm_(std::move(pm)), mm_(std::move(mm)), alpha_(alpha), kappa_(kappa), beta_(beta), n_(n), m_(m), P_post_(P0)
 {
@@ -108,9 +108,9 @@ UKF::UKF(double alpha, double kappa, double beta, int n, int m, const Eigen::Mat
 }
 
 /*****************************************************************
- * @brief 设置UKF初始状态
+ * @brief 设置Ukf初始状态
  *****************************************************************/
-void UKF::set_state(const Eigen::VectorXd &x0)
+void Ukf::set_state(const Eigen::VectorXd &x0)
 {
 	x_post_ = x0;
 	x_pred_ = x_post_;
@@ -119,7 +119,7 @@ void UKF::set_state(const Eigen::VectorXd &x0)
 /*****************************************************************
  * @brief 基于当前后验协方差生成Sigma点
  *****************************************************************/
-std::vector<Eigen::VectorXd> UKF::generate_sigma_points()
+std::vector<Eigen::VectorXd> Ukf::generate_sigma_points()
 {
 	std::vector<Eigen::VectorXd> sigma_points(sigma_num_);
 	/*计算协方差矩阵*/
@@ -145,9 +145,9 @@ std::vector<Eigen::VectorXd> UKF::generate_sigma_points()
 }
 
 /*****************************************************************
- * @brief UKF预测步骤：传播Sigma点，加权计算先验状态与协方差
+ * @brief Ukf预测步骤：传播Sigma点，加权计算先验状态与协方差
  *****************************************************************/
-Eigen::VectorXd UKF::predict(double dt)
+Eigen::VectorXd Ukf::predict(double dt)
 {
 	/*生成sigma点*/
 	sigma_points_post_ = generate_sigma_points();
@@ -177,9 +177,9 @@ Eigen::VectorXd UKF::predict(double dt)
 }
 
 /*****************************************************************
- * @brief UKF更新步骤：利用观测修正先验状态
+ * @brief Ukf更新步骤：利用观测修正先验状态
  *****************************************************************/
-Eigen::VectorXd UKF::update(const Eigen::VectorXd &z)
+Eigen::VectorXd Ukf::update(const Eigen::VectorXd &z)
 {
 	/*传播观测值的sigma点,并计算观测预测均值*/
 	std::vector<Eigen::VectorXd> zeta(sigma_num_);

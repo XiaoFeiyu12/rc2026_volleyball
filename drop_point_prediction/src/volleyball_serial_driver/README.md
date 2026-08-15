@@ -2,7 +2,7 @@
 
 # 排球机器人串口数据包协议
 
-## robotArray - RX 需接受数据
+## RobotArray - RX 需接受数据
 
 | Byte | 类型 | Data | 说明 |
 | - | - | - | - |
@@ -27,7 +27,7 @@
 - 2 catching 自主接球中
 - 3 over 结束接球
 
-## planArray - TX 发送内容
+## PlanArray - TX 发送内容
 由于实际有多个命令：移动规划,这里先列出总的框架：
 
 | Byte | 类型 | Data | 说明 | 
