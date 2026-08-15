@@ -1,0 +1,12 @@
+Language: Cpp
+BasedOnStyle: Google
+
+AccessModifierOffset: -4
+AlignTrailingComments: true
+BreakBeforeBraces: Allman
+IndentCaseLabels: false
+IndentWidth: 4
+ColumnLimit: 120
+TabWidth: 4
+UseTab: Always
+PointerAlignment: Right

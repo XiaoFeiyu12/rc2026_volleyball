@@ -3,11 +3,7 @@ is_to_launch:
   usb_camera: false
   robot_description: true
   detector_node: true
-  pid_camera_node: false
   ibvs_controller_node: true
-  tracker_node: false
-  predict_node: false
-  planner_node: false
   serial_driver_node: true
   rviz: false
   foxglove_node: true
@@ -15,12 +11,8 @@ is_to_launch:
   mock_odom: false #模拟里程计（无下位机时使用）
 
 info_level:
-  pid_camera_node: INFO
   ibvs_controller_node: DEBUG
   detector_node: DEBUG
-  tracker_node: INFO
-  predict_node: INFO
-  planner_node: INFO
   serial_driver_node: DEBUG
 
 robot_description:

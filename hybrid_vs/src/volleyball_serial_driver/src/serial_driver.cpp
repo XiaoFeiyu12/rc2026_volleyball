@@ -42,12 +42,6 @@ SerialDriverNode::SerialDriverNode(std::string node_name)
     // 发布joint_states给robot_state_publisher用于delta_arm俯仰角TF
     joint_state_pub_ =
         this->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
-    // tracker/planner复位服务客户端（下位机切模式时调用）
-    reset_tracker_client_ = this->create_client<std_srvs::srv::Trigger>("/tracker/reset");
-    reset_planner_client_ = this->create_client<std_srvs::srv::Trigger>("/planner/reset");
-    // 订阅规划消息
-    plan_sub_ = this->create_subscription<volleyball_interfaces::msg::Plan>(
-        "/planner/plan", rclcpp::SensorDataQoS(), std::bind(&SerialDriverNode::plan_callback, this, std::placeholders::_1));
     // 订阅 pid_camera 像素偏移
     pid_cam_sub_ = this->create_subscription<volleyball_interfaces::msg::PidCamera>(
         "/pid_camera", rclcpp::SensorDataQoS(), std::bind(&SerialDriverNode::pid_cam_callback, this, std::placeholders::_1));
@@ -224,23 +218,7 @@ void SerialDriverNode::serial_write_callback()
             RCLCPP_INFO(this->get_logger(),"下位机发布pid调控:dx:%.1f,dy:.%1f,is_hit:%d",latest_pid_cam_.pixel_diff_x,latest_pid_cam_.pixel_diff_y, latest_pid_cam_.is_hit);
             has_new_pid_cam_ = false;
         }
-        has_new_plan_ = false;
         return;
-    }
-    else if (has_new_plan_)
-    {
-        plan_array_ptr_->msg_.header_ = 0xAA;
-        plan_array_ptr_->msg_.cmd_ = 0;
-        plan_array_ptr_->msg_.len_ = 16;
-        plan_array_ptr_->msg_.x_ = latest_plan_.x;
-        plan_array_ptr_->msg_.y_ = latest_plan_.y;
-        plan_array_ptr_->msg_.is_hit_ = 0;
-        plan_array_ptr_->msg_.landing_time_ = latest_plan_.landing_time - timestamp_offset_;  // 减去传输延迟
-        plan_array_ptr_->msg_.my_xor_ = get_content_xor(&plan_array_ptr_->array_[1], sizeof(plan_array_ptr_->array_) - 3);
-        plan_array_ptr_->msg_.tail_ = 0x55;
-        serial_write(plan_array_ptr_->array_, sizeof(plan_array_ptr_->array_));
-                RCLCPP_INFO(this->get_logger(),"下位机发布规划:dx:%.1f,dy:.%1f",latest_plan_.x,latest_plan_.y);
-        has_new_plan_ = false;
     }
   }
 }
@@ -276,35 +254,6 @@ void SerialDriverNode::robot_callback()
             robot_msg.mode = robot_array_ptr_->msg_.mode_;
             robot_base_pub_->publish(robot_msg);
 
-            // 检测下位机模式从自主模式切换至遥控模式，触发tracker和planner复位
-            uint8_t current_mode = robot_array_ptr_->msg_.mode_;
-            if (last_mode_ == 2 && current_mode != last_mode_)
-            {
-                RCLCPP_INFO(this->get_logger(),
-                    "检测到下位机模式切换: %d -> %d，调用tracker/planner复位服务", last_mode_, current_mode);
-
-                auto request = std::make_shared<std_srvs::srv::Trigger::Request>();
-
-                if (reset_tracker_client_->wait_for_service(1s))
-                {
-                    reset_tracker_client_->async_send_request(request);
-                }
-                else
-                {
-                    RCLCPP_WARN(this->get_logger(), "tracker复位服务不可用");
-                }
-
-                if (reset_planner_client_->wait_for_service(1s))
-                {
-                    reset_planner_client_->async_send_request(request);
-                }
-                else
-                {
-                    RCLCPP_WARN(this->get_logger(), "planner复位服务不可用");
-                }
-            }
-            last_mode_ = current_mode;
-
             is_read_ = false;
         }
         catch (const std::exception& ex)
@@ -312,16 +261,6 @@ void SerialDriverNode::robot_callback()
             RCLCPP_ERROR_THROTTLE(this->get_logger(), *this->get_clock(), 20, "处理串口数据时发生错误: %s", ex.what());
         }
     }
-}
-
-/*****************************************************************
- * @brief 规划消息订阅回调，将规划指令打包为下位机协议格式
- *****************************************************************/
-void SerialDriverNode::plan_callback(volleyball_interfaces::msg::Plan::SharedPtr msg)
-{
-
-    latest_plan_ = *msg;
-    has_new_plan_ = true;
 }
 
 void SerialDriverNode::pid_cam_callback(volleyball_interfaces::msg::PidCamera::SharedPtr msg)

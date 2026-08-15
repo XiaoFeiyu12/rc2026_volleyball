@@ -28,7 +28,6 @@
 // Project
 #include "volleyball_detect/detector.hpp"
 #include "volleyball_interfaces/msg/ball.hpp"
-#include "volleyball_interfaces/msg/pid_camera.hpp"
 // std
 #include <mutex>
 
@@ -65,9 +64,6 @@ private:
     std::shared_ptr<message_filters::Synchronizer<SyncPolicy>> sync_;
     // 球检测结果发布
     rclcpp::Publisher<volleyball_interfaces::msg::Ball>::SharedPtr ball_pub_;
-    rclcpp::Publisher<volleyball_interfaces::msg::PidCamera>::SharedPtr pid_camera_pub_;
-    // USB 相机订阅
-    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr usb_cam_sub_;
     std::string camera_frame_id_;
     // 检测器实例
     std::shared_ptr<Detector> detector_;

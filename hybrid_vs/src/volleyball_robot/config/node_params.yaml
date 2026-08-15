@@ -1,10 +1,3 @@
-# ===== 全局共享参数 =====
-/**:
-  ros__parameters:
-    k: 0.02           #空气阻力系数
-    m: 0.27           #排球质量，单位kg
-    g: 9.80           #重力加速度，单位m/s^2
-
 ibvs_controller_node:
   ros__parameters:
     Kp_lat: 6057.0        # 横向比例增益 (cm/s)/m（strike_point系 y, 1m→6057cm/s）

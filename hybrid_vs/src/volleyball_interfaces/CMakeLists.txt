@@ -13,11 +13,9 @@ find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
     "msg/Ball.msg"
-    "msg/BallTrajectory.msg"
     "msg/RobotBase.msg"
-    "msg/Plan.msg"
     "msg/PidCamera.msg"
-    DEPENDENCIES 
+    DEPENDENCIES
     geometry_msgs
 )
 

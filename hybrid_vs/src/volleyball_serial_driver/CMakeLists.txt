@@ -20,7 +20,6 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(volleyball_interfaces REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -36,7 +35,6 @@ ament_target_dependencies(${PROJECT_NAME}_node
   serial_driver
   volleyball_interfaces
   sensor_msgs
-  std_srvs
   )
   
 if(BUILD_TESTING)

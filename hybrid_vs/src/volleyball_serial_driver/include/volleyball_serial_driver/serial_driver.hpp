@@ -12,10 +12,8 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <serial_driver/serial_driver.hpp>
-#include <std_srvs/srv/trigger.hpp>
 // Project
 #include "volleyball_interfaces/msg/robot_base.hpp"
-#include "volleyball_interfaces/msg/plan.hpp"
 #include "volleyball_interfaces/msg/ball.hpp"
 #include "volleyball_interfaces/msg/pid_camera.hpp"
 #include "packet.h"
@@ -40,7 +38,6 @@ private:
     void serial_write_callback();    // 定时写入回调，发送规划指令
     uint8_t get_content_xor(uint8_t *data_begin, int len);  // 计算异或校验值
     void robot_callback();           // 发布机器人位姿与TF的定时回调
-    void plan_callback(volleyball_interfaces::msg::Plan::SharedPtr msg);  // 规划消息订阅回调
 
     void pid_cam_callback(volleyball_interfaces::msg::PidCamera::SharedPtr msg);
     void ball_callback(volleyball_interfaces::msg::Ball::SharedPtr msg);
@@ -48,7 +45,6 @@ private:
     /*@brief 串口相关变量*/
     bool is_open_ = false;
     bool is_read_ = false;
-    bool has_new_plan_ = false;
     bool has_new_pid_cam_ = false;
     bool has_pid_cam_data_ = false;  // IBVS 持续发送模式标志
     bool has_ball_depth_ = false;
@@ -77,16 +73,9 @@ private:
     rclcpp::TimerBase::SharedPtr publish_timer_;
     rclcpp::Publisher<volleyball_interfaces::msg::RobotBase>::SharedPtr robot_base_pub_;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
-    rclcpp::Subscription<volleyball_interfaces::msg::Plan>::SharedPtr plan_sub_;
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_tracker_client_;
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_planner_client_;
     rclcpp::Subscription<volleyball_interfaces::msg::PidCamera>::SharedPtr pid_cam_sub_;
     rclcpp::Subscription<volleyball_interfaces::msg::Ball>::SharedPtr ball_sub_;
-    volleyball_interfaces::msg::Plan latest_plan_;
     volleyball_interfaces::msg::PidCamera latest_pid_cam_;
-
-    uint8_t last_mode_ = 0;  // 上一次下位机模式，用于检测模式切换
-
 
     // 数据包联合体指针，用于串口字节流与结构体的转换
     RobotArray *robot_array_ptr_;
