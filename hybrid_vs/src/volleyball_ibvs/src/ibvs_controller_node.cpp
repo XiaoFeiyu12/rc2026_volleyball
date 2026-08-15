@@ -117,8 +117,8 @@ void IbvsControllerNode::ball_callback(const Ball::SharedPtr msg)
 	double vx_cmd = Kp_long_ * smoothed_dist_;
 
 	PidCamera pid_msg;
-	pid_msg.pixel_diff_x = static_cast<float>(vy_cmd);
-	pid_msg.pixel_diff_y = static_cast<float>(vx_cmd);	// 放大以便下位机处理
+	pid_msg.dx = static_cast<float>(vy_cmd);
+	pid_msg.dy = static_cast<float>(vx_cmd);	// 放大以便下位机处理
 
 	// 处理击球逻辑
 	if (pt_base.point.x < hit_offset_x_ && pt_base.point.x > 0.0 && std::abs(pt_base.point.y) < hit_offset_y_ &&
@@ -140,8 +140,8 @@ void IbvsControllerNode::watchdog_callback()
 	if (dt > timeout_ && filter_inited_)
 	{
 		PidCamera pid_msg;
-		pid_msg.pixel_diff_x = 0.0f;
-		pid_msg.pixel_diff_y = 0.0f;
+		pid_msg.dx = 0.0f;
+		pid_msg.dy = 0.0f;
 		pid_camera_pub_->publish(pid_msg);
 		filter_inited_ = false;
 

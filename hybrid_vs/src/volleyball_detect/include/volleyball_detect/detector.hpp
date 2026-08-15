@@ -111,7 +111,6 @@ public:
 	// 构造函数：加载模型并初始化推理引擎
 	Detector(const rclcpp::Logger logger, const std::string &model_path, const cv::Size model_input_shape,
 			 const float confidence_threshold, const float nms_threshold, const float depth_validation_threshold,
-			 const cv::Mat &color_camera_matrix, const cv::Mat &color_dist_coeffs,
 			 const rs2_intrinsics &color_camera_intrin, const rs2_intrinsics &depth_camera_intrin,
 			 const rs2_extrinsics &depth_to_color_extrin, const rs2_extrinsics &color_to_depth_extrin);
 	~Detector() {};	 // 析构函数

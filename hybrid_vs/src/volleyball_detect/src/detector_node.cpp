@@ -60,14 +60,6 @@ void DetectorNode::try_initialize()
 
 	// ---- 从 CameraInfo 消息构建内参 ----
 	// color k[row-major]: [fx, 0, cx, 0, fy, cy, 0, 0, 1]
-	cv::Mat color_camera_matrix = (cv::Mat_<float>(3, 3) << static_cast<float>(color_info_.k[0]),
-								   static_cast<float>(color_info_.k[1]), static_cast<float>(color_info_.k[2]),
-								   static_cast<float>(color_info_.k[3]), static_cast<float>(color_info_.k[4]),
-								   static_cast<float>(color_info_.k[5]), static_cast<float>(color_info_.k[6]),
-								   static_cast<float>(color_info_.k[7]), static_cast<float>(color_info_.k[8]));
-	cv::Mat color_dist_coeffs = (cv::Mat_<float>(1, 5) << static_cast<float>(color_info_.d[0]),
-								 static_cast<float>(color_info_.d[1]), static_cast<float>(color_info_.d[2]),
-								 static_cast<float>(color_info_.d[3]), static_cast<float>(color_info_.d[4]));
 
 	rs2_intrinsics color_camera_intrin;
 	rs2_intrinsics depth_camera_intrin;
@@ -178,7 +170,7 @@ void DetectorNode::try_initialize()
 
 	detector_ = std::make_shared<Detector>(this->get_logger(), param_model_path, cv::Size(640, 640),
 										   model_confidence_threshold, model_nms_threshold, depth_validation_threshold,
-										   color_camera_matrix, color_dist_coeffs, color_camera_intrin,
+										   color_camera_intrin,
 										   depth_camera_intrin, depth_to_color_extrin, color_to_depth_extrin);
 	last_time_ = this->now();
 

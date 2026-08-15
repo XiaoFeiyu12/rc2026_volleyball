@@ -46,10 +46,6 @@ SerialDriverNode::SerialDriverNode(std::string node_name)
 	pid_cam_sub_ = this->create_subscription<volleyball_interfaces::msg::PidCamera>(
 		"/pid_camera", rclcpp::SensorDataQoS(),
 		std::bind(&SerialDriverNode::pid_cam_callback, this, std::placeholders::_1));
-	// 订阅 /detector/ball 获取 Realsense 深度
-	ball_sub_ = this->create_subscription<volleyball_interfaces::msg::Ball>(
-		"/detector/ball", rclcpp::SensorDataQoS(),
-		std::bind(&SerialDriverNode::ball_callback, this, std::placeholders::_1));
 
 	// 串口写入定时器（500Hz）
 	write_timer_ = this->create_wall_timer(2ms, std::bind(&SerialDriverNode::serial_write_callback, this));
@@ -149,17 +145,6 @@ void SerialDriverNode::serial_read_thread()
 					}
 					//  RCLCPP_INFO(get_logger(), "读取串口.");
 				}
-				// //调试上位向下位固定发送指令
-				// plan_array_ptr_->msg_.header_ = 0xAA;
-				// plan_array_ptr_->msg_.cmd_ = 0;
-				// plan_array_ptr_->msg_.len_ = 16;
-				// plan_array_ptr_->msg_.x_ = 0.01;
-				// plan_array_ptr_->msg_.y_ = 0.01;
-				// plan_array_ptr_->msg_.self_yaw_ = 0;
-				// plan_array_ptr_->msg_.landing_time_ = 1;  // 更新计划消息中的时间戳,以便计算传输延迟
-				// plan_array_ptr_->msg_.my_xor_ = get_content_xor(&plan_array_ptr_->array_[1],
-				// sizeof(plan_array_ptr_->array_) - 3);  // 更新校验值 plan_array_ptr_->msg_.tail_ = 0x55;
-				// serial_write(plan_array_ptr_->array_, sizeof(plan_array_ptr_->array_));
 			}
 
 			catch (const std::exception &error)
@@ -204,10 +189,9 @@ void SerialDriverNode::serial_write_callback()
 			plan_array_ptr_->msg_.header_ = 0xAA;
 			plan_array_ptr_->msg_.cmd_ = 1;
 			plan_array_ptr_->msg_.len_ = 16;
-			plan_array_ptr_->msg_.x_ = latest_pid_cam_.pixel_diff_x;
-			plan_array_ptr_->msg_.y_ = latest_pid_cam_.pixel_diff_y;
+			plan_array_ptr_->msg_.x_ = latest_pid_cam_.dx;
+			plan_array_ptr_->msg_.y_ = latest_pid_cam_.dy;
 			plan_array_ptr_->msg_.is_hit_ = latest_pid_cam_.is_hit;
-			plan_array_ptr_->msg_.landing_time_ = 0.0f;
 			plan_array_ptr_->msg_.my_xor_ =
 				get_content_xor(&plan_array_ptr_->array_[1], sizeof(plan_array_ptr_->array_) - 3);
 			plan_array_ptr_->msg_.tail_ = 0x55;
@@ -218,7 +202,7 @@ void SerialDriverNode::serial_write_callback()
 			if (has_new_pid_cam_)
 			{
 				RCLCPP_INFO(this->get_logger(), "下位机发布pid调控:dx:%.1f,dy:.%1f,is_hit:%d",
-							latest_pid_cam_.pixel_diff_x, latest_pid_cam_.pixel_diff_y, latest_pid_cam_.is_hit);
+							latest_pid_cam_.dx, latest_pid_cam_.dy, latest_pid_cam_.is_hit);
 				has_new_pid_cam_ = false;
 			}
 			return;
@@ -238,8 +222,8 @@ void SerialDriverNode::robot_callback()
 			// 从下位机获取delta机械臂俯仰角,通过JointState发布TF
 			double pitch = robot_array_ptr_->msg_.self_pitch_;
 
-			RCLCPP_DEBUG(this->get_logger(), "x:%05.2f/y:%05.2f/self_pitch:%05.2f,mode:%d", robot_array_ptr_->msg_.x_,
-						 robot_array_ptr_->msg_.y_, robot_array_ptr_->msg_.self_pitch_, robot_array_ptr_->msg_.mode_);
+			RCLCPP_DEBUG(this->get_logger(), "self_pitch:%05.2f,mode:%d", robot_array_ptr_->msg_.self_pitch_,
+						 robot_array_ptr_->msg_.mode_);
 
 			// 发布delta_arm_joint关节状态,robot_state_publisher根据URDF自动发布base_link->delta_arm_link的TF
 			// URDF中已定义静态偏移: xyz="0.051 0 0.191" rpy="-3.1416 0 0", joint axis="0 1 0"(绕Y轴俯仰)
@@ -251,8 +235,6 @@ void SerialDriverNode::robot_callback()
 
 			// 发布机器人基座消息（含模式信息）
 			volleyball_interfaces::msg::RobotBase robot_msg;
-			robot_msg.x = robot_array_ptr_->msg_.x_;
-			robot_msg.y = robot_array_ptr_->msg_.y_;
 			robot_msg.self_pitch = pitch;
 			robot_msg.self_yaw = 0.0;
 			robot_msg.mode = robot_array_ptr_->msg_.mode_;
@@ -274,12 +256,6 @@ void SerialDriverNode::pid_cam_callback(volleyball_interfaces::msg::PidCamera::S
 	has_pid_cam_data_ = true;  // 进入 IBVS 持续发送模式
 }
 
-void SerialDriverNode::ball_callback(volleyball_interfaces::msg::Ball::SharedPtr msg)
-{
-	// 使用 Ball.z（相机坐标系前方深度）作为深度判断依据
-	latest_ball_depth_ = msg->z;
-	has_ball_depth_ = true;
-}
 
 uint8_t SerialDriverNode::get_content_xor(uint8_t *data_begin, int len)
 {

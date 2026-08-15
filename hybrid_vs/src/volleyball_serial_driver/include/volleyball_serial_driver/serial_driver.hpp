@@ -15,7 +15,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 // Project
 #include "packet.h"
-#include "volleyball_interfaces/msg/ball.hpp"
 #include "volleyball_interfaces/msg/pid_camera.hpp"
 #include "volleyball_interfaces/msg/robot_base.hpp"
 
@@ -41,15 +40,12 @@ private:
 	void robot_callback();									// 发布机器人位姿与TF的定时回调
 
 	void pid_cam_callback(volleyball_interfaces::msg::PidCamera::SharedPtr msg);
-	void ball_callback(volleyball_interfaces::msg::Ball::SharedPtr msg);
 
 	/*@brief 串口相关变量*/
 	bool is_open_ = false;
 	bool is_read_ = false;
 	bool has_new_pid_cam_ = false;
 	bool has_pid_cam_data_ = false;	 // IBVS 持续发送模式标志
-	bool has_ball_depth_ = false;
-	float latest_ball_depth_ = 1000.0f;
 	std::string *dev_name_;
 	std::thread serial_read_thread_;
 	SerialPortConfig *port_config_;
@@ -75,7 +71,6 @@ private:
 	rclcpp::Publisher<volleyball_interfaces::msg::RobotBase>::SharedPtr robot_base_pub_;
 	rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_pub_;
 	rclcpp::Subscription<volleyball_interfaces::msg::PidCamera>::SharedPtr pid_cam_sub_;
-	rclcpp::Subscription<volleyball_interfaces::msg::Ball>::SharedPtr ball_sub_;
 	volleyball_interfaces::msg::PidCamera latest_pid_cam_;
 
 	// 数据包联合体指针，用于串口字节流与结构体的转换
