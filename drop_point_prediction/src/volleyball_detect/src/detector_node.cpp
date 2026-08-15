@@ -60,12 +60,12 @@ void DetectorNode::try_initialize()
 
 	// ---- 从 CameraInfo 消息构建内参 ----
 	// color k[row-major]: [fx, 0, cx, 0, fy, cy, 0, 0, 1]
-	cv::Mat color_cameraMatrix = (cv::Mat_<float>(3, 3) << static_cast<float>(color_info_.k[0]),
+	cv::Mat color_camera_matrix = (cv::Mat_<float>(3, 3) << static_cast<float>(color_info_.k[0]),
 								  static_cast<float>(color_info_.k[1]), static_cast<float>(color_info_.k[2]),
 								  static_cast<float>(color_info_.k[3]), static_cast<float>(color_info_.k[4]),
 								  static_cast<float>(color_info_.k[5]), static_cast<float>(color_info_.k[6]),
 								  static_cast<float>(color_info_.k[7]), static_cast<float>(color_info_.k[8]));
-	cv::Mat color_distCoeffs = (cv::Mat_<float>(1, 5) << static_cast<float>(color_info_.d[0]),
+	cv::Mat color_dist_coeffs = (cv::Mat_<float>(1, 5) << static_cast<float>(color_info_.d[0]),
 								static_cast<float>(color_info_.d[1]), static_cast<float>(color_info_.d[2]),
 								static_cast<float>(color_info_.d[3]), static_cast<float>(color_info_.d[4]));
 
@@ -144,12 +144,12 @@ void DetectorNode::try_initialize()
 	}
 	RCLCPP_INFO(this->get_logger(), "Loading model from: %s", param_model_path.c_str());
 	// 模型参数
-	float model_confidence_threshold, model_NMS_threshold, depth_validation_threshold;
+	float model_confidence_threshold, model_nms_threshold, depth_validation_threshold;
 	this->declare_parameter<float>("model_confidence_threshold", 0.7);
-	this->declare_parameter<float>("model_NMS_threshold", 0.5);
+	this->declare_parameter<float>("model_nms_threshold", 0.5);
 	this->declare_parameter<float>("depth_validation_threshold", 0.7);
 	this->get_parameter("model_confidence_threshold", model_confidence_threshold);
-	this->get_parameter("model_NMS_threshold", model_NMS_threshold);
+	this->get_parameter("model_nms_threshold", model_nms_threshold);
 	this->get_parameter("depth_validation_threshold", depth_validation_threshold);
 
 	this->declare_parameter<bool>("debug", true);
@@ -177,8 +177,8 @@ void DetectorNode::try_initialize()
 	}
 
 	detector_ = std::make_shared<Detector>(this->get_logger(), param_model_path, cv::Size(640, 640),
-										   model_confidence_threshold, model_NMS_threshold, depth_validation_threshold,
-										   color_cameraMatrix, color_distCoeffs, color_camera_intrin,
+										   model_confidence_threshold, model_nms_threshold, depth_validation_threshold,
+										   color_camera_matrix, color_dist_coeffs, color_camera_intrin,
 										   depth_camera_intrin, depth_to_color_extrin, color_to_depth_extrin);
 	last_time_ = this->now();
 
@@ -257,11 +257,11 @@ void DetectorNode::rgbd_img_callback(const sensor_msgs::msg::Image::ConstSharedP
 float DetectorNode::get_fps()
 {
 	float fps, dt;
-	rclcpp::Time current_time_ = this->now();
-	dt = (current_time_ - last_time_).seconds();
+	rclcpp::Time current_time = this->now();
+	dt = (current_time - last_time_).seconds();
 	fps = frame_cnt_ / dt;
 	frame_cnt_ = 0;
-	last_time_ = current_time_;
+	last_time_ = current_time;
 	return fps;
 }
 

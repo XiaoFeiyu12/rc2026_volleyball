@@ -11,14 +11,14 @@ namespace volleyball
  * @brief 构造函数：加载OpenVINO模型、设置预处理管道、编译模型
  *****************************************************************/
 Detector::Detector(const rclcpp::Logger logger, const std::string &model_path, const cv::Size model_input_shape,
-				   const float confidence_threshold, const float NMS_threshold, const float depth_validation_threshold,
-				   const cv::Mat &color_cameraMatrix, const cv::Mat &color_distCoeffs,
+				   const float confidence_threshold, const float nms_threshold, const float depth_validation_threshold,
+				   const cv::Mat &color_camera_matrix, const cv::Mat &color_dist_coeffs,
 				   const rs2_intrinsics &color_camera_intrin, const rs2_intrinsics &depth_camera_intrin,
 				   const rs2_extrinsics &depth_to_color_extrin, const rs2_extrinsics &color_to_depth_extrin)
 	: logger_(logger),
 	  model_input_shape_(model_input_shape),
 	  confidence_threshold_(confidence_threshold),
-	  NMS_threshold_(NMS_threshold),
+	  nms_threshold_(nms_threshold),
 	  color_camera_intrin_(color_camera_intrin),
 	  depth_camera_intrin_(depth_camera_intrin),
 	  depth_to_color_extrin_(depth_to_color_extrin),
@@ -33,21 +33,21 @@ Detector::Detector(const rclcpp::Logger logger, const std::string &model_path, c
 			{1, 3, static_cast<long int>(model_input_shape_.height), static_cast<long int>(model_input_shape_.width)});
 	}
 	// 设置自动预处理：BGR u8 → RGB f32，除以255归一化
-	ov::preprocess::PrePostProcessor ppp_(model);
-	ppp_.input()
+	ov::preprocess::PrePostProcessor ppp(model);
+	ppp.input()
 		.tensor()
 		.set_element_type(ov::element::u8)
 		.set_layout("NHWC")
 		.set_color_format(ov::preprocess::ColorFormat::BGR);
-	ppp_.input()
+	ppp.input()
 		.preprocess()
 		.convert_element_type(ov::element::f32)
 		.convert_color(ov::preprocess::ColorFormat::RGB)
 		.scale({255, 255, 255});
-	ppp_.input().model().set_layout("NCHW");
-	ppp_.output().tensor().set_element_type(ov::element::f32);
+	ppp.input().model().set_layout("NCHW");
+	ppp.output().tensor().set_element_type(ov::element::f32);
 	// 重建模型并编译到CPU
-	model = ppp_.build();
+	model = ppp.build();
 	// 编译模型
 	compiled_model_ =
 		core_.compile_model(model, "AUTO:CPU,GPU", ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
@@ -161,11 +161,11 @@ void Detector::post_processing(std::vector<DetectionBox> &detection_box_list)
 		}
 	}
 	// 非极大值抑制，去除重叠框
-	std::vector<int> NMS_result;
-	cv::dnn::NMSBoxes(box_list, confidence_list, confidence_threshold_, NMS_threshold_, NMS_result);
+	std::vector<int> nms_result;
+	cv::dnn::NMSBoxes(box_list, confidence_list, confidence_threshold_, nms_threshold_, nms_result);
 
 	// 对NMS后保留的每个框，缩放回原始图像尺寸
-	for (const int id : NMS_result)
+	for (const int id : nms_result)
 	{
 		DetectionBox result;
 		result.class_id_ = class_list[id];

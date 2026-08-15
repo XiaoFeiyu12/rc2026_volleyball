@@ -10,7 +10,7 @@ detector_node:
   ros__parameters:
     model_path: "model/volleyball_v3_3_int8/best.xml"
     model_confidence_threshold : 0.6
-    model_NMS_threshold : 0.45
+    model_nms_threshold : 0.45
     depth_validation_threshold : 0.5
     debug : true
     camera_frame_id : "camera_color_optical_frame"

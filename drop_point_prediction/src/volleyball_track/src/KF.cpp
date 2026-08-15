@@ -183,12 +183,12 @@ Eigen::VectorXd Ukf::update(const Eigen::VectorXd &z)
 {
 	/*传播观测值的sigma点,并计算观测预测均值*/
 	std::vector<Eigen::VectorXd> zeta(sigma_num_);
-	Eigen::VectorXd z_pri_mean_(m_);
-	z_pri_mean_.setZero();
+	Eigen::VectorXd z_pri_mean(m_);
+	z_pri_mean.setZero();
 	for (int i = 0; i < sigma_num_; i++)
 	{
 		zeta[i] = mm_.h_(sigma_points_pred_[i]);
-		z_pri_mean_ += Wm_[i] * zeta[i];
+		z_pri_mean += Wm_[i] * zeta[i];
 	}
 	/*计算新息协方差和交叉协方差*/
 	Eigen::MatrixXd S(m_, m_);
@@ -197,7 +197,7 @@ Eigen::VectorXd Ukf::update(const Eigen::VectorXd &z)
 	Pxz.setZero();
 	for (int i = 0; i < sigma_num_; i++)
 	{
-		Eigen::VectorXd error = zeta[i] - z_pri_mean_;
+		Eigen::VectorXd error = zeta[i] - z_pri_mean;
 		S += Wc_[i] * error * error.transpose();
 		Pxz += Wc_[i] * (sigma_points_pred_[i] - x_pred_) * error.transpose();
 	}
@@ -205,7 +205,7 @@ Eigen::VectorXd Ukf::update(const Eigen::VectorXd &z)
 	/*计算卡尔曼增益*/
 	Eigen::MatrixXd K = Pxz * S.ldlt().solve(Eigen::MatrixXd::Identity(S.rows(), S.cols()));
 	/*更新*/
-	x_post_ = x_pred_ + K * (z - z_pri_mean_);
+	x_post_ = x_pred_ + K * (z - z_pri_mean);
 	P_post_ = P_pred_ - K * S * K.transpose();
 
 	return x_post_;

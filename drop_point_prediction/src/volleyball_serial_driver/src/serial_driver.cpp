@@ -125,7 +125,7 @@ void SerialDriverNode::serial_read_thread()
 	while (rclcpp::ok())
 	{
 		std::vector<uint8_t> head(1);
-		std::vector<uint8_t> robotData(sizeof(robot_array_ptr_->array_) - 1);
+		std::vector<uint8_t> robot_data(sizeof(robot_array_ptr_->array_) - 1);
 		if (is_open_)
 		{
 			try
@@ -133,16 +133,16 @@ void SerialDriverNode::serial_read_thread()
 				serial_driver_.port()->receive(head);
 				if (head[0] == 0xAA)
 				{  // 包头为0xAA
-					serial_driver_.port()->receive(robotData);
-					robotData.insert(robotData.begin(), head[0]);
+					serial_driver_.port()->receive(robot_data);
+					robot_data.insert(robot_data.begin(), head[0]);
 
 					// 校验环节
-					uint8_t tail = robotData[robotData.size() - 1];
-					uint8_t myxor = robotData[robotData.size() - 2];
+					uint8_t tail = robot_data[robot_data.size() - 1];
+					uint8_t my_xor = robot_data[robot_data.size() - 2];
 
-					if (tail == 0x55 && myxor == SerialDriverNode::get_content_xor(&robotData[1], robotData.size() - 3))
+					if (tail == 0x55 && my_xor == SerialDriverNode::get_content_xor(&robot_data[1], robot_data.size() - 3))
 					{
-						memcpy(robot_array_ptr_->array_, robotData.data(), sizeof(robot_array_ptr_->array_));
+						memcpy(robot_array_ptr_->array_, robot_data.data(), sizeof(robot_array_ptr_->array_));
 						is_read_ = true;
 					}
 					else
@@ -180,10 +180,10 @@ void SerialDriverNode::serial_read_thread()
  *****************************************************************/
 void SerialDriverNode::serial_write(uint8_t *data, size_t len)
 {
-	std::vector<uint8_t> tempData(data, data + len);
+	std::vector<uint8_t> temp_data(data, data + len);
 	try
 	{
-		serial_driver_.port()->send(tempData);
+		serial_driver_.port()->send(temp_data);
 		// RCLCPP_INFO(get_logger(), "写入串口.");
 	}
 	catch (const std::exception &error)
