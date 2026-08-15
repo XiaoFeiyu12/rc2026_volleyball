@@ -30,9 +30,9 @@ class PredictNode : public rclcpp::Node
 public:
 	typedef enum
 	{
-		TO_OWN_SIDE = 0,   // 球飞向己方
-		TO_OPPONENT_SIDE,  // 球飞向对方
-		TO_STOP,		   // 球静止
+		VOLLEYBALL_STATE_TO_OWN_SIDE = 0,   // 球飞向己方
+		VOLLEYBALL_STATE_TO_OPPONENT_SIDE,  // 球飞向对方
+		VOLLEYBALL_STATE_TO_STOP,		   // 球静止
 	} VolleyballState;
 
 	PredictNode();

@@ -195,11 +195,11 @@ void TrackerNode::ball_lost_selfcheck_timer_callback()
 {
 	auto now = this->now();
 	double dt = (now - last_time_).seconds();
-	if (dt > lost_selfcheck_time_thres && tracker_->get_state() != Tracker::STATE_IDLE)
+	if (dt > lost_selfcheck_time_thres && tracker_->get_state() != Tracker::TRACK_STATE_IDLE)
 	{
 		tracker_->predict_only(dt);
 		last_time_ = now;
-		if (tracker_->get_state() != Tracker::STATE_IDLE)
+		if (tracker_->get_state() != Tracker::TRACK_STATE_IDLE)
 		{
 			publish_tracked_ball(now);
 		}
@@ -252,10 +252,10 @@ void TrackerNode::publish_tracked_ball(const rclcpp::Time &stamp)
 		linear_v_marker_.points.clear();
 		linear_v_marker_.points.emplace_back(position_marker_.pose.position);
 		geometry_msgs::msg::Point arrow_end = position_marker_.pose.position;
-		const double arrow_scale = 0.2;
-		arrow_end.x += pos(1) * arrow_scale;
-		arrow_end.y += pos(3) * arrow_scale;
-		arrow_end.z += pos(5) * arrow_scale;
+		const double ARROW_SCALE = 0.2;
+		arrow_end.x += pos(1) * ARROW_SCALE;
+		arrow_end.y += pos(3) * ARROW_SCALE;
+		arrow_end.z += pos(5) * ARROW_SCALE;
 		linear_v_marker_.points.emplace_back(arrow_end);
 
 		ball_marker_.header = position_marker_.header;

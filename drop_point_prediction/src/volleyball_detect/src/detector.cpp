@@ -231,7 +231,7 @@ bool Detector::get_ball_pos_depth_img(Ball &volleyball, const DetectionBox &dete
 	// 从图像中心开始检测深度
 	const int search_radius = 9;
 	cv::Point box_center(detect_box.cx, detect_box.cy);
-	uint16_t min_depth = depth_max;
+	uint16_t min_depth = DEPTH_MAX;
 	cv::Point min_dis_point;  // 遍历半径范围内深度最小点，找出视线内最近的点
 
 	bool is_update = false;
@@ -245,14 +245,14 @@ bool Detector::get_ball_pos_depth_img(Ball &volleyball, const DetectionBox &dete
 			float depth_pixel[2];
 
 			rs2_project_color_pixel_to_depth_pixel(depth_pixel, (const uint16_t *)depth_img.data, depth_scale_,
-												   depth_min, depth_max, &depth_camera_intrin_, &color_camera_intrin_,
+												   DEPTH_MIN, DEPTH_MAX, &depth_camera_intrin_, &color_camera_intrin_,
 												   &color_to_depth_extrin_, &depth_to_color_extrin_, color_pixel);
 			// 防出界处理
 			int depth_x = static_cast<int>(depth_pixel[0]);
 			int depth_y = static_cast<int>(depth_pixel[1]);
 			if (depth_x < 0 || depth_x > depth_img.cols - 1 || depth_y < 0 || depth_y > depth_img.rows - 1) continue;
 			uint16_t depth = depth_img.ptr<uint16_t>(depth_y)[depth_x];
-			if (depth <= 0 || depth >= depth_max) continue;
+			if (depth <= 0 || depth >= DEPTH_MAX) continue;
 			if (depth < min_depth)
 			{
 				min_depth = depth;

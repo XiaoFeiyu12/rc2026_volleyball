@@ -50,9 +50,9 @@ void PlannerNode::ball_trajectory_callback(const BallTrajectory::SharedPtr msg)
 		arrow_start.z = 0.0;
 		plan_point_marker_.points.emplace_back(arrow_start);
 		geometry_msgs::msg::Point arrow_end = arrow_start;
-		const double arrow_scale = 1;
-		arrow_end.x += cos(plan.self_yaw * 3.1415926 / 180.0) * arrow_scale;
-		arrow_end.y += sin(plan.self_yaw * 3.1415926 / 180.0) * arrow_scale;
+		const double ARROW_SCALE = 1;
+		arrow_end.x += cos(plan.self_yaw * 3.1415926 / 180.0) * ARROW_SCALE;
+		arrow_end.y += sin(plan.self_yaw * 3.1415926 / 180.0) * ARROW_SCALE;
 		plan_point_marker_.points.emplace_back(arrow_end);
 		visualization_msgs::msg::MarkerArray marker_array;
 		marker_array.markers.emplace_back(plan_point_marker_);

@@ -84,8 +84,8 @@ private:
 	float NMS_threshold_;		  // NMS阈值
 	// RealSense深度图参数
 	float depth_scale_ = 0.001;	 // 深度比例尺（mm→m）
-	static const int depth_max = 7500;
-	static const int depth_min = 0;
+	static const int DEPTH_MAX = 7500;
+	static const int DEPTH_MIN = 0;
 	rs2_intrinsics color_camera_intrin_;	// 彩色相机内参
 	rs2_intrinsics depth_camera_intrin_;	// 深度相机内参
 	rs2_extrinsics depth_to_color_extrin_;	// 深度→彩色外参
