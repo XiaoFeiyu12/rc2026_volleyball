@@ -50,7 +50,7 @@ IbvsControllerNode::IbvsControllerNode()
   // ── 订阅 detector 的 3D 球位置 ──
   ball_sub_ = this->create_subscription<Ball>(
       "/detector/ball", rclcpp::SensorDataQoS(),
-      std::bind(&IbvsControllerNode::ballCallback, this, std::placeholders::_1));
+      std::bind(&IbvsControllerNode::ball_callback, this, std::placeholders::_1));
 
   // ── 发布到 /pid_camera（serial_driver 已订阅，复用 cmd=1） ──
   pid_camera_pub_ = this->create_publisher<PidCamera>(
@@ -59,7 +59,7 @@ IbvsControllerNode::IbvsControllerNode()
   // ── 看门狗定时器 ──
   watchdog_timer_ = this->create_wall_timer(
       std::chrono::duration<double>(timeout_ / 2.0),
-      std::bind(&IbvsControllerNode::watchdogCallback, this));
+      std::bind(&IbvsControllerNode::watchdog_callback, this));
 
   last_ball_time_ = this->now();
 
@@ -70,7 +70,7 @@ IbvsControllerNode::IbvsControllerNode()
       Kp_lat_, Kp_long_, alpha_, timeout_);
 }
 
-void IbvsControllerNode::ballCallback(const Ball::SharedPtr msg)
+void IbvsControllerNode::ball_callback(const Ball::SharedPtr msg)
 {
   last_ball_time_ = this->now();
 
@@ -144,7 +144,7 @@ void IbvsControllerNode::ballCallback(const Ball::SharedPtr msg)
 }
 
 
-void IbvsControllerNode::watchdogCallback()
+void IbvsControllerNode::watchdog_callback()
 {
   double dt = (this->now() - last_ball_time_).seconds();
   if (dt > timeout_ && filter_inited_)

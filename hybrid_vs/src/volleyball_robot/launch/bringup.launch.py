@@ -64,36 +64,6 @@ def generate_launch_description():
         ld.add_action(get_realsense_camera_launch())
 
     # ============================================================
-    # USB 相机
-    # ============================================================
-    if is_to_launch_params['usb_camera']:
-        usb_camera_config = camera_params['usb_camera']
-
-        # usb_cam 控制项名与相机 V4L2 名称不匹配（如 exposure_auto vs auto_exposure），
-        # 通过 v4l2-ctl 直接设置 v4l2_controls 中列出的控制项
-        v4l2_ctrls = usb_camera_config.pop('v4l2_controls', {})
-        if v4l2_ctrls:
-            cmd_parts = ['v4l2-ctl', '-d', usb_camera_config['video_device']]
-            for name, val in v4l2_ctrls.items():
-                cmd_parts.extend(['-c', f'{name}={val}'])
-            v4l2_setup = ExecuteProcess(
-                cmd=cmd_parts,
-                name='v4l2_camera_setup',
-                output='screen',
-            )
-            ld.add_action(v4l2_setup)
-
-        usb_cam_node = Node(
-            package='usb_cam',
-            executable='usb_cam_node_exe',
-            name='usb_cam',
-            output='screen',
-            remappings=[('image_raw', '/usb_cam/image_raw')],
-            parameters=[usb_camera_config],
-        )
-        ld.add_action(TimerAction(period=0.5, actions=[usb_cam_node]))
-
-    # ============================================================
     # 机器人描述（URDF + joint_state_publisher + robot_state_publisher）
     # ============================================================
     if is_to_launch_params['robot_description']:
@@ -156,22 +126,7 @@ def generate_launch_description():
         ld.add_action(TimerAction(period=0.5, actions=[detector_node]))
 
     # ============================================================
-    # PID相机节点—— 延迟 0.5s 等待相机初始化（已弃用，由 ibvs_controller 替代）
-    # ============================================================
-    if is_to_launch_params['pid_camera_node']:
-        pid_camera_node = Node(
-            package='volleyball_pid_camera',
-            executable='pid_camera_node',
-            name='pid_camera_node',
-            output='screen',
-            parameters=[node_params],
-            ros_arguments=["--ros-args", "--log-level", "pid_camera_node:=" + info_level_params["pid_camera_node"]],
-            emulate_tty=True,
-        )
-        ld.add_action(TimerAction(period=0.5, actions=[pid_camera_node]))
-
-    # ============================================================
-    # IBVS 控制器（替代 pid_camera，直接从 detector Ball 计算速度指令）
+    # IBVS
     # ============================================================
     if is_to_launch_params.get('ibvs_controller_node', False):
         ibvs_controller_node = Node(
@@ -183,48 +138,6 @@ def generate_launch_description():
             ros_arguments=["--ros-args", "--log-level", "ibvs_controller_node:=" + info_level_params.get("ibvs_controller_node", "INFO")],
         )
         ld.add_action(TimerAction(period=1.0, actions=[ibvs_controller_node]))
-
-    # ============================================================
-    # 追踪节点（EKF 滤波）—— 延迟 1.0s
-    # ============================================================
-    if is_to_launch_params['tracker_node']:
-        tracker_node = Node(
-            package='volleyball_track',
-            executable='volleyball_track',
-            output='screen',
-            name='tracker_node',
-            parameters=[node_params],
-            ros_arguments=["--ros-args", "--log-level", "tracker_node:=" + info_level_params['tracker_node']],
-        )
-        ld.add_action(TimerAction(period=1.0, actions=[tracker_node]))
-
-    # ============================================================
-    # 预测节点（RK4 轨迹预测）—— 延迟 1.5s
-    # ============================================================
-    if is_to_launch_params['predict_node']:
-        predict_node = Node(
-            package='volleyball_predict',
-            executable='volleyball_predict',
-            output='screen',
-            name='predict_node',
-            parameters=[node_params],
-            ros_arguments=["--ros-args", "--log-level", "predict_node:=" + info_level_params['predict_node']],
-        )
-        ld.add_action(TimerAction(period=1.5, actions=[predict_node]))
-
-    # ============================================================
-    # 规划节点（接球位姿计算）—— 延迟 2.0s
-    # ============================================================
-    if is_to_launch_params['planner_node']:
-        planner_node = Node(
-            package='volleyball_plan',
-            executable='volleyball_plan',
-            output='screen',
-            name='planner_node',
-            parameters=[node_params],
-            ros_arguments=["--ros-args", "--log-level", "planner_node:=" + info_level_params['planner_node']],
-        )
-        ld.add_action(TimerAction(period=2.0, actions=[planner_node]))
 
     # ============================================================
     # Foxglove 桥接（在线调参 + 可视化）[默认关闭]

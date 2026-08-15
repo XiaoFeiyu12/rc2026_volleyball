@@ -11,16 +11,16 @@ namespace volleyball
 /*****************************************************************
  * @brief 构造函数：加载OpenVINO模型、设置预处理管道、编译模型
  *****************************************************************/
-Detector::Detector(const rclcpp::Logger logger, const std::string& model_path, const cv::Size model_input_shape, 
-                   const float confidence_threshold, const float NMS_threshold, 
+Detector::Detector(const rclcpp::Logger logger, const std::string& model_path, const cv::Size model_input_shape,
+                   const float confidence_threshold, const float nms_threshold,
                    const float depth_validation_threshold,
-                   const cv::Mat& color_cameraMatrix, const cv::Mat& color_distCoeffs,
+                   const cv::Mat& color_camera_matrix, const cv::Mat& color_dist_coeffs,
                    const rs2_intrinsics& color_camera_intrin, const rs2_intrinsics& depth_camera_intrin,
                    const rs2_extrinsics& depth_to_color_extrin, const rs2_extrinsics& color_to_depth_extrin)
   : logger_(logger)
   , model_input_shape_(model_input_shape)
   , confidence_threshold_(confidence_threshold)
-  , NMS_threshold_(NMS_threshold)
+  , nms_threshold_(nms_threshold)
   , color_camera_intrin_(color_camera_intrin)
   , depth_camera_intrin_(depth_camera_intrin)
   , depth_to_color_extrin_(depth_to_color_extrin)
@@ -35,21 +35,21 @@ Detector::Detector(const rclcpp::Logger logger, const std::string& model_path, c
             { 1, 3, static_cast<long int>(model_input_shape_.height), static_cast<long int>(model_input_shape_.width) });
     }
     // 设置自动预处理：BGR u8 → RGB f32，除以255归一化
-    ov::preprocess::PrePostProcessor ppp_(model);
-    ppp_.input()
+    ov::preprocess::PrePostProcessor ppp(model);
+    ppp.input()
         .tensor()
         .set_element_type(ov::element::u8)
         .set_layout("NHWC")
         .set_color_format(ov::preprocess::ColorFormat::BGR);
-    ppp_.input()
+    ppp.input()
         .preprocess()
         .convert_element_type(ov::element::f32)
         .convert_color(ov::preprocess::ColorFormat::RGB)
         .scale({ 255, 255, 255 });
-    ppp_.input().model().set_layout("NCHW");
-    ppp_.output().tensor().set_element_type(ov::element::f32);
+    ppp.input().model().set_layout("NCHW");
+    ppp.output().tensor().set_element_type(ov::element::f32);
     // 重建模型并编译到CPU
-    model = ppp_.build();
+    model = ppp.build();
     // 编译模型
     compiled_model_ = core_.compile_model(model, "AUTO:CPU,GPU", ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
     // 请求推理
@@ -73,7 +73,7 @@ Detector::Detector(const rclcpp::Logger logger, const std::string& model_path, c
 /*****************************************************************
  * @brief 图像预处理：缩放至模型输入尺寸并拷贝到输入张量
  *****************************************************************/
-void Detector::PreProcessing(const cv::Mat& img)
+void Detector::pre_processing(const cv::Mat& img)
 {
     auto start = std::chrono::system_clock::now();
 
@@ -109,7 +109,7 @@ void Detector::PreProcessing(const cv::Mat& img)
 /*****************************************************************
  * @brief 后处理：解析模型输出，提取检测框并执行NMS
  *****************************************************************/
-void Detector::PostProcessing(std::vector<DetectionBox>& detection_box_list)
+void Detector::post_processing(std::vector<DetectionBox>& detection_box_list)
 {
     auto start = std::chrono::system_clock::now();
 
@@ -133,10 +133,10 @@ void Detector::PostProcessing(std::vector<DetectionBox>& detection_box_list)
         // 现在为每一个候选框找到最大置信度类别
         float max_score = 0.0f;
         int best_class = -1;
-        for (int c = 0; c < C; ++c) 
+        for (int c = 0; c < C; ++c)
         {
             const float score = data[(4+c)*D + i];
-            if (score > max_score) 
+            if (score > max_score)
             {
                 max_score = score;
                 best_class = c;
@@ -162,18 +162,18 @@ void Detector::PostProcessing(std::vector<DetectionBox>& detection_box_list)
         }
     }
     // 非极大值抑制，去除重叠框
-    std::vector<int> NMS_result;
-    cv::dnn::NMSBoxes(box_list, confidence_list, confidence_threshold_, NMS_threshold_, NMS_result);
+    std::vector<int> nms_result;
+    cv::dnn::NMSBoxes(box_list, confidence_list, confidence_threshold_, nms_threshold_, nms_result);
 
     // 对NMS后保留的每个框，缩放回原始图像尺寸
-    for (const int id : NMS_result)
+    for (const int id : nms_result)
     {
         DetectionBox result;
-        result.class_id = class_list[id];
-        result.confidence = confidence_list[id];
-        result.box = GetBoundingBox(box_list[id]);
-        result.cx = static_cast<float>(result.box.x + result.box.width * 0.5f);
-        result.cy = static_cast<float>(result.box.y + result.box.height * 0.5f);
+        result.class_id_ = class_list[id];
+        result.confidence_ = confidence_list[id];
+        result.box_ = get_bounding_box(box_list[id]);
+        result.cx_ = static_cast<float>(result.box_.x + result.box_.width * 0.5f);
+        result.cy_ = static_cast<float>(result.box_.y + result.box_.height * 0.5f);
         detection_box_list.push_back(result);
     }
 
@@ -185,7 +185,7 @@ void Detector::PostProcessing(std::vector<DetectionBox>& detection_box_list)
 /*****************************************************************
  * @brief 将检测框从模型输出尺寸缩放回原始图像尺寸
  *****************************************************************/
-cv::Rect Detector::GetBoundingBox(const cv::Rect& src) const
+cv::Rect Detector::get_bounding_box(const cv::Rect& src) const
 {
     cv::Rect box = src;
     box.x = static_cast<int>((box.x - padding_x_) / letterbox_scale_);
@@ -201,19 +201,19 @@ cv::Rect Detector::GetBoundingBox(const cv::Rect& src) const
 std::vector<DetectionBox> Detector::infer(const cv::Mat& input_img)
 {
   auto start = std::chrono::system_clock::now();
-  PreProcessing(input_img);
+  pre_processing(input_img);
   infer_request_.infer();
   std::vector<DetectionBox> detection_box_list;
-  PostProcessing(detection_box_list);
+  post_processing(detection_box_list);
   auto end = std::chrono::system_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
   if (!detection_box_list.empty())
   {
     for (auto detect_box : detection_box_list)
     {
-        RCLCPP_DEBUG(logger_, 
+        RCLCPP_DEBUG(logger_,
             "推理时间:%.1fms, 检测到目标，置信度:%.2f, x:%d, y:%d, w:%d, h:%d",
-            static_cast<double>(duration.count()), detect_box.confidence, detect_box.box.x, detect_box.box.y, detect_box.box.width, detect_box.box.height);
+            static_cast<double>(duration.count()), detect_box.confidence_, detect_box.box_.x, detect_box.box_.y, detect_box.box_.width, detect_box.box_.height);
     }
   }
   return detection_box_list;
@@ -222,7 +222,7 @@ std::vector<DetectionBox> Detector::infer(const cv::Mat& input_img)
 /*****************************************************************
  * @brief 基于深度图获取排球3D位置（深度图投影法）
  *****************************************************************/
-bool Detector::getBallPos_depth_img(Ball& volleyball, const DetectionBox& detect_box, const cv::Mat& depth_img)
+bool Detector::get_ball_pos_depth_img(Ball& volleyball, const DetectionBox& detect_box, const cv::Mat& depth_img)
 {
     auto start = std::chrono::system_clock::now();
     color_camera_intrin_.height = depth_img.rows;
@@ -231,33 +231,33 @@ bool Detector::getBallPos_depth_img(Ball& volleyball, const DetectionBox& detect
     depth_camera_intrin_.width = depth_img.cols;
     // 从图像中心开始检测深度
     const int search_radius = 9;
-    cv::Point box_center(detect_box.cx, detect_box.cy);
-    uint16_t min_depth = depth_max;
+    cv::Point box_center(detect_box.cx_, detect_box.cy_);
+    uint16_t min_depth = DEPTH_MAX;
     cv::Point min_dis_point;  // 遍历半径范围内深度最小点，找出视线内最近的点
 
     bool is_update = false;
     for (int du = -search_radius; du <= search_radius; du+=2)
     {
-        if (du > detect_box.box.width || du < -detect_box.box.width)
+        if (du > detect_box.box_.width || du < -detect_box.box_.width)
         continue;
         for (int dv = -search_radius; dv <= search_radius; dv+=2)
         {
-            if (dv > detect_box.box.height || dv < -detect_box.box.height)
+            if (dv > detect_box.box_.height || dv < -detect_box.box_.height)
                 continue;
             float color_pixel[2] = { static_cast<float>(box_center.x + du), static_cast<float>(box_center.y + dv) };
             float depth_pixel[2];
 
-            rs2_project_color_pixel_to_depth_pixel(depth_pixel, (const uint16_t*)depth_img.data, depth_scale_, depth_min,
-                                                    depth_max, &depth_camera_intrin_, &color_camera_intrin_,
+            rs2_project_color_pixel_to_depth_pixel(depth_pixel, (const uint16_t*)depth_img.data, depth_scale_, DEPTH_MIN,
+                                                    DEPTH_MAX, &depth_camera_intrin_, &color_camera_intrin_,
                                                     &color_to_depth_extrin_, &depth_to_color_extrin_, color_pixel);
             // 防出界处理
             int depth_x = static_cast<int>(depth_pixel[0]);
             int depth_y = static_cast<int>(depth_pixel[1]);
-            if (depth_x < 0 || depth_x > depth_img.cols - 1 || 
+            if (depth_x < 0 || depth_x > depth_img.cols - 1 ||
                 depth_y < 0 || depth_y > depth_img.rows - 1)
                 continue;
             uint16_t depth = depth_img.ptr<uint16_t>(depth_y)[depth_x];
-            if (depth <= 0 || depth >= depth_max)
+            if (depth <= 0 || depth >= DEPTH_MAX)
                 continue;
             if (depth < min_depth)
             {
@@ -274,11 +274,11 @@ bool Detector::getBallPos_depth_img(Ball& volleyball, const DetectionBox& detect
 
     Eigen::Vector3f surface_point(x, y, z);
     Eigen::Vector3f direction = surface_point.normalized();
-    Eigen::Vector3f ball_center = surface_point + direction * volleyball.radius_3d;
+    Eigen::Vector3f ball_center = surface_point + direction * volleyball.radius_3d_;
 
-    volleyball.x = ball_center.x();
-    volleyball.y = ball_center.y();
-    volleyball.z = ball_center.z();
+    volleyball.x_ = ball_center.x();
+    volleyball.y_ = ball_center.y();
+    volleyball.z_ = ball_center.z();
 
     auto end = std::chrono::system_clock::now();
     auto time =  std::chrono::duration_cast<std::chrono::microseconds>(end - start);
@@ -290,31 +290,31 @@ bool Detector::getBallPos_depth_img(Ball& volleyball, const DetectionBox& detect
 /*****************************************************************
  * @brief 基于几何关系估算排球3D位置（小孔成像法）
  *****************************************************************/
-void Detector::getBallPos_geometry(Ball& volleyball, const DetectionBox& detect_box)
+void Detector::get_ball_pos_geometry(Ball& volleyball, const DetectionBox& detect_box)
 {
-    float D = volleyball.radius_3d * 2;
-    float z1 = color_camera_intrin_.fx * D / detect_box.box.width;
-    float z2 = color_camera_intrin_.fy * D / detect_box.box.height;
+    float D = volleyball.radius_3d_ * 2;
+    float z1 = color_camera_intrin_.fx * D / detect_box.box_.width;
+    float z2 = color_camera_intrin_.fy * D / detect_box.box_.height;
     float z = (z1 + z2) / 2;
-    float x = (detect_box.cx - color_camera_intrin_.ppx) * z / color_camera_intrin_.fx;
-    float y = (detect_box.cy - color_camera_intrin_.ppy) * z / color_camera_intrin_.fy;
+    float x = (detect_box.cx_ - color_camera_intrin_.ppx) * z / color_camera_intrin_.fx;
+    float y = (detect_box.cy_ - color_camera_intrin_.ppy) * z / color_camera_intrin_.fy;
 
-    volleyball.x = x;
-    volleyball.y = y;
-    volleyball.z = z;
+    volleyball.x_ = x;
+    volleyball.y_ = y;
+    volleyball.z_ = z;
 }
 
 /*****************************************************************
  * @brief 在图像上绘制检测框和置信度
  *****************************************************************/
-void Detector::drawDetectResult(cv::Mat& color_img, const std::vector<DetectionBox>& detect_box_list)
+void Detector::draw_detect_result(cv::Mat& color_img, const std::vector<DetectionBox>& detect_box_list)
 {
     for (auto detect_box : detect_box_list)
     {
         //标出检测框
-        cv::rectangle(color_img, detect_box.box, cv::Scalar(255, 0, 0));
+        cv::rectangle(color_img, detect_box.box_, cv::Scalar(255, 0, 0));
         //显示置信度
-        std::string text = "volleyball:" + std::to_string(detect_box.confidence);
+        std::string text = "volleyball:" + std::to_string(detect_box.confidence_);
         int font_face = cv::FONT_HERSHEY_COMPLEX;
         double font_scale = 0.5;
         int thickness = 1;
@@ -322,8 +322,8 @@ void Detector::drawDetectResult(cv::Mat& color_img, const std::vector<DetectionB
         //获取文本框的长宽
         cv::Size text_size = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
         cv::Point origin;
-        origin.x = detect_box.box.x;
-        origin.y = detect_box.box.y + text_size.height;
+        origin.x = detect_box.box_.x;
+        origin.y = detect_box.box_.y + text_size.height;
         cv::putText(color_img, text, origin, font_face, font_scale, cv::Scalar(0, 255, 255), thickness);
     }
 }
@@ -339,37 +339,37 @@ void Detector::detect(const cv::Mat& color_img, const cv::Mat& depth_img)
     for (DetectionBox box : detection_box_list_)
     {
         Ball ball;
-        ball.confidence = box.confidence;
+        ball.confidence_ = box.confidence_;
         try
         {
             // 无论如何先计算几何法进行距离上的约束
             Ball ball_geo;
-            getBallPos_geometry(ball_geo, box);
-            ball_geo.confidence = box.confidence;
-            double z_geo = ball_geo.z;
+            get_ball_pos_geometry(ball_geo, box);
+            ball_geo.confidence_ = box.confidence_;
+            double z_geo = ball_geo.z_;
 
-            bool depth_valid = getBallPos_depth_img(ball, box, depth_img);
-            if (depth_valid) 
+            bool depth_valid = get_ball_pos_depth_img(ball, box, depth_img);
+            if (depth_valid)
             {
-                double z_depth = ball.z;
+                double z_depth = ball.z_;
                 double relative_diff = std::abs(z_depth - z_geo) / std::max(0.1, z_geo);
-                if (relative_diff <= depth_validation_threshold_) 
+                if (relative_diff <= depth_validation_threshold_)
                 {
-                    ball.position_type = 0;
-                    RCLCPP_DEBUG(logger_, "深度图获取(%.2f,%.2f,%2f)", ball.x, ball.y, ball.z);
+                    ball.position_type_ = 0;
+                    RCLCPP_DEBUG(logger_, "深度图获取(%.2f,%.2f,%2f)", ball.x_, ball.y_, ball.z_);
                 }
-                else 
+                else
                 {
                     ball = ball_geo;
-                    ball.position_type = 1;
-                    RCLCPP_DEBUG(logger_, "深度交叉验证失败，几何法(%.2f,%.2f,%2f)", ball.x, ball.y, ball.z);
+                    ball.position_type_ = 1;
+                    RCLCPP_DEBUG(logger_, "深度交叉验证失败，几何法(%.2f,%.2f,%2f)", ball.x_, ball.y_, ball.z_);
                 }
             }
-            else 
+            else
             {
                 ball = ball_geo;
-                ball.position_type = 1;
-                RCLCPP_DEBUG(logger_, "未能获取深度,采用几何法,(%.2f,%.2f,%2f)", ball.x, ball.y, ball.z);
+                ball.position_type_ = 1;
+                RCLCPP_DEBUG(logger_, "未能获取深度,采用几何法,(%.2f,%.2f,%2f)", ball.x_, ball.y_, ball.z_);
             }
 
 
@@ -387,7 +387,7 @@ void Detector::detect(const cv::Mat& color_img, const cv::Mat& depth_img)
     {
         RCLCPP_WARN(logger_, "检测到%zu个球，取置信度最高的一个", ball_list_.size());
         auto max_it = std::max_element(ball_list_.begin(), ball_list_.end(),
-            [](const Ball& a, const Ball& b) { return a.confidence < b.confidence; });
+            [](const Ball& a, const Ball& b) { return a.confidence_ < b.confidence_; });
         Ball best_ball = *max_it;
         ball_list_.clear();
         ball_list_.push_back(best_ball);

@@ -37,8 +37,8 @@ private:
   using Ball = volleyball_interfaces::msg::Ball;
   using PidCamera = volleyball_interfaces::msg::PidCamera;
 
-  void ballCallback(const Ball::SharedPtr msg);
-  void watchdogCallback();
+  void ball_callback(const Ball::SharedPtr msg);
+  void watchdog_callback();
 
 
   // ── TF ──

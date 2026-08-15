@@ -12,7 +12,7 @@
 #pragma pack(1)
 
 /*******************************************************************************
- * @struct robotMsg
+ * @struct RobotMsg
  * @brief 机器人状态数据包结构体（下位机→上位机）
  * @param header 帧头(0xAA)
  * @param mode 机器人当前运动模式
@@ -25,18 +25,18 @@
  *******************************************************************************/
 typedef struct _robot_msg_
 {
-  uint8_t header;
-  uint8_t mode;
-  uint8_t state;
-  float x;
-  float y;
-  float self_pitch;
-  uint8_t my_xor;
-  uint8_t tail;
-} robotMsg;
+  uint8_t header_;
+  uint8_t mode_;
+  uint8_t state_;
+  float x_;
+  float y_;
+  float self_pitch_;
+  uint8_t my_xor_;
+  uint8_t tail_;
+} RobotMsg;
 
 /*******************************************************************************
- * @struct planMsg
+ * @struct PlanMsg
  * @brief 规划指令数据包结构体（上位机→下位机）
  * @param header 帧头(0xAA)
  * @param cmd 指令类型
@@ -50,35 +50,35 @@ typedef struct _robot_msg_
  *******************************************************************************/
 typedef struct _plan_msg_
 {
-  uint8_t header;
-  uint8_t cmd;
-  uint16_t len;
-  float x;
-  float y;
-  uint8_t is_hit;
-  float landing_time;
-  uint8_t my_xor;
-  uint8_t tail;
-} planMsg;
+  uint8_t header_;
+  uint8_t cmd_;
+  uint16_t len_;
+  float x_;
+  float y_;
+  uint8_t is_hit_;
+  float landing_time_;
+  uint8_t my_xor_;
+  uint8_t tail_;
+} PlanMsg;
 
 /*******************************************************************************
- * @union robotArray
+ * @union RobotArray
  * @brief 机器人状态数据包联合体，用于字节流与结构体转换
  *******************************************************************************/
-union robotArray
+union RobotArray
 {
-  robotMsg msg;
-  uint8_t array[sizeof(robotMsg)];
+  RobotMsg msg_;
+  uint8_t array_[sizeof(RobotMsg)];
 };
 
 /*******************************************************************************
- * @union planArray
+ * @union PlanArray
  * @brief 规划指令数据包联合体，用于字节流与结构体转换
  *******************************************************************************/
-union planArray
+union PlanArray
 {
-  planMsg msg;
-  uint8_t array[sizeof(planMsg)];
+  PlanMsg msg_;
+  uint8_t array_[sizeof(PlanMsg)];
 };
 
 #pragma pack()

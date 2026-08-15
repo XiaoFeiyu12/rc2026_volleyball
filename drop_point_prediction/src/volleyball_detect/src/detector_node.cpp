@@ -90,31 +90,31 @@ void DetectorNode::try_initialize()
 
 	// ---- 从 Extrinsics 消息构建外参（rotation 为 column-major） ----
 	Eigen::Map<const Eigen::Matrix3d> rot_map(extrinsics_.rotation.data());
-	Eigen::Matrix3f depth_to_color_Rotation = rot_map.cast<float>();
+	Eigen::Matrix3f depth_to_color_rotation = rot_map.cast<float>();
 
-	Eigen::Matrix3f color_to_depth_Rotation = depth_to_color_Rotation.transpose();
+	Eigen::Matrix3f color_to_depth_rotation = depth_to_color_rotation.transpose();
 
-	Eigen::Vector3f depth_to_color_Translation(static_cast<float>(extrinsics_.translation[0]),
+	Eigen::Vector3f depth_to_color_translation(static_cast<float>(extrinsics_.translation[0]),
 											   static_cast<float>(extrinsics_.translation[1]),
 											   static_cast<float>(extrinsics_.translation[2]));
-	Eigen::Vector3f color_to_depth_Translation = -color_to_depth_Rotation * depth_to_color_Translation;
+	Eigen::Vector3f color_to_depth_translation = -color_to_depth_rotation * depth_to_color_translation;
 
 	// 填充 rs2_extrinsics (row-major)
 	for (int row = 0; row < 3; row++)
 		for (int col = 0; col < 3; col++)
-			depth_to_color_extrin.rotation[row * 3 + col] = depth_to_color_Rotation(row, col);
+			depth_to_color_extrin.rotation[row * 3 + col] = depth_to_color_rotation(row, col);
 
-	depth_to_color_extrin.translation[0] = depth_to_color_Translation.x();
-	depth_to_color_extrin.translation[1] = depth_to_color_Translation.y();
-	depth_to_color_extrin.translation[2] = depth_to_color_Translation.z();
+	depth_to_color_extrin.translation[0] = depth_to_color_translation.x();
+	depth_to_color_extrin.translation[1] = depth_to_color_translation.y();
+	depth_to_color_extrin.translation[2] = depth_to_color_translation.z();
 
 	for (int row = 0; row < 3; row++)
 		for (int col = 0; col < 3; col++)
-			color_to_depth_extrin.rotation[row * 3 + col] = color_to_depth_Rotation(row, col);
+			color_to_depth_extrin.rotation[row * 3 + col] = color_to_depth_rotation(row, col);
 
-	color_to_depth_extrin.translation[0] = color_to_depth_Translation.x();
-	color_to_depth_extrin.translation[1] = color_to_depth_Translation.y();
-	color_to_depth_extrin.translation[2] = color_to_depth_Translation.z();
+	color_to_depth_extrin.translation[0] = color_to_depth_translation.x();
+	color_to_depth_extrin.translation[1] = color_to_depth_translation.y();
+	color_to_depth_extrin.translation[2] = color_to_depth_translation.z();
 
 	/*--------------------------------------------------------------------------------------------------*/
 	// 模型文件获取

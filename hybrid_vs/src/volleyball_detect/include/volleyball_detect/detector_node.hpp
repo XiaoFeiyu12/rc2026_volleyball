@@ -56,7 +56,7 @@ private:
     bool extrinsics_received_ = false;
     std::mutex init_mutex_;
     bool initialized_ = false;
-    void tryInitialize();  // 检查三个参数到齐后完成初始化
+    void try_initialize();  // 检查三个参数到齐后完成初始化
 
     // ---- 图像订阅（RGB深度图同步） ----
     std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image>> rgb_img_sub_;
@@ -87,11 +87,11 @@ private:
     int debug_frame_skip_;
     int debug_frame_counter_;
 
-    void RGBDImgCallback(const sensor_msgs::msg::Image::ConstSharedPtr& rgb_msg,  // RGBD图像回调
+    void rgbd_img_callback(const sensor_msgs::msg::Image::ConstSharedPtr& rgb_msg,  // RGBD图像回调
                         const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg);
-    float getFPS();                                              // 计算帧率
-    void createDebugPublisher();                                 // 创建调试图像发布器
-    
+    float get_fps();                                              // 计算帧率
+    void create_debug_publisher();                                 // 创建调试图像发布器
+
 public:
     DetectorNode();  // 构造函数
     ~DetectorNode() {}
