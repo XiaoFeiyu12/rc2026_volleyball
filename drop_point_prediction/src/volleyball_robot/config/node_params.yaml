@@ -68,5 +68,4 @@ serial_driver_node:
     odom_frame_id: "odom"
     base_link_frame_id: "base_link"
     # 下位机→上位机坐标系转换参数,单位deg度
-    # 下位机: x右 y前, 上位机: x前 y右
     odom2base_rpy: [0.0, 0.0, 90.0]

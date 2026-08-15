@@ -75,7 +75,7 @@ DETECTING ──(积累 detect_cnt_tres 帧)──→ TRACKING ──(检测到�
 
 - 管理 `DETECTING` / `TRACKING` / `LOST` 三种状态
 - `update()`: 检测到来时执行预测 + 更新
-- `predictOnly()`: 检测丢失时纯外推，累计超过阈值切至 `LOST`
+- `predict_only()`: 检测丢失时纯外推，累计超过阈值切至 `LOST`
 - `reset()`: 手动复位至 `DETECTING`
 
 ### `EKF` — 扩展卡尔曼滤波器
@@ -137,7 +137,7 @@ volleyball_predict (轨迹预测)
 ## 丢检处理机制
 
 - `ball_lost_selfcheck_timer_callback` 以 **0.1s 周期** 检查自上次检测以来的时间间隔
-- 超过 `lost_selfcheck_time_thres`（同 `lost_time`）后调用 `tracker_->predictOnly(dt)` 进行纯外推
+- 超过 `lost_selfcheck_time_thres`（同 `lost_time`）后调用 `tracker_->predict_only(dt)` 进行纯外推
 - 外推累计超过 `lost_time_threshold` 则状态切至 `LOST`
 
 ## Launch 文件

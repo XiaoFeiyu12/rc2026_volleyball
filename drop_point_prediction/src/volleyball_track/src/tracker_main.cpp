@@ -1,10 +1,10 @@
 #include "volleyball_track/tracker_node.hpp"
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    rclcpp::init(argc, argv);
-    auto node = std::make_shared<volleyball::TrackerNode>();
-    rclcpp::spin(node);
-    rclcpp::shutdown();
-    return 0 ;
+	rclcpp::init(argc, argv);
+	auto node = std::make_shared<volleyball::TrackerNode>();
+	rclcpp::spin(node);
+	rclcpp::shutdown();
+	return 0;
 }

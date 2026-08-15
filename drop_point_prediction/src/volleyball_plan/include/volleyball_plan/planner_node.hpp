@@ -9,31 +9,30 @@
 // eigen
 #include <eigen3/Eigen/Dense>
 // Project
-#include "volleyball_plan/planner.hpp"
 #include "volleyball_interfaces/msg/ball_trajectory.hpp"
 #include "volleyball_interfaces/msg/plan.hpp"
+#include "volleyball_plan/planner.hpp"
 
 namespace volleyball
 {
 class PlannerNode : public rclcpp::Node
 {
 public:
-    PlannerNode();
+	PlannerNode();
+
 private:
-    // striking_point_bias_ = [dx, dy, dz]^T
-    Eigen::Vector3d striking_point_bias_;
+	// striking_point_bias_ = [dx, dy, dz]^T
+	Eigen::Vector3d striking_point_bias_;
 
-    std::shared_ptr<Planner> planner_;
-    rclcpp::Publisher<volleyball_interfaces::msg::Plan>::SharedPtr plan_pub_;
-    rclcpp::Subscription<volleyball_interfaces::msg::BallTrajectory>::SharedPtr ball_trajectory_sub_;
+	std::shared_ptr<Planner> planner_;
+	rclcpp::Publisher<volleyball_interfaces::msg::Plan>::SharedPtr plan_pub_;
+	rclcpp::Subscription<volleyball_interfaces::msg::BallTrajectory>::SharedPtr ball_trajectory_sub_;
 
-    visualization_msgs::msg::Marker plan_point_marker_;
-    rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
+	visualization_msgs::msg::Marker plan_point_marker_;
+	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 
-    void BallTrajectoryCallback(const BallTrajectory::SharedPtr msg);
+	void ball_trajectory_callback(const BallTrajectory::SharedPtr msg);
 };
-}
-
-
+}  // namespace volleyball
 
 #endif
