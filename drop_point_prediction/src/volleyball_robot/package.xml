@@ -19,7 +19,6 @@
   <depend>volleyball_serial_driver</depend>
   <depend>volleyball_robot_description</depend>
   <depend>realsense_camera</depend>
-  <depend>volleyball_pid_camera</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

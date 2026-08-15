@@ -12,22 +12,3 @@ realsense: #这里的参数优先级高于.json文件的
   depth_module.enable_auto_exposure: false
   publish_tf: true
   json_file_path: "config/realsense_config.json"
-
-usb_camera:
-  video_device: "/dev/video0"
-  pixel_format: "mjpeg2rgb"
-  image_width: 640
-  image_height: 480
-  framerate: 60.0
-  # --- usb_cam 内置参数 ---
-  # brightness: 0                        # 亮度 (-128~127)
-  # contrast: 63                         # 对比度 (0~63)
-  # saturation: 128                      # 饱和度 (0~128)
-  # sharpness: 31                        # 锐度 (0~31)
-  # gain: 0                              # 增益 (0~63)
-  # --- 直接 v4l2-ctl 设置（绕过 usb_cam 控制项名不匹配的问题） ---
-  v4l2_controls:
-    auto_exposure: 1                   # 0=Auto, 1=Manual Mode
-    exposure_time_absolute: 350       # 手动曝光时间 (1~5000)
-    white_balance_automatic: 1         # 0=手动, 1=自动
-    # white_balance_temperature: 4000  # 手动色温 (2800~6500) — 自动模式开启时禁用

@@ -46,8 +46,6 @@ private:
 	bool is_open_ = false;
 	bool is_read_ = false;
 	bool has_new_plan_ = false;
-	bool has_new_pid_cam_ = false;
-	bool has_pid_cam_data_ = false;	 // IBVS 持续发送模式标志
 	bool has_ball_depth_ = false;
 	float latest_ball_depth_ = 1000.0f;
 	std::string *dev_name_;

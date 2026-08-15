@@ -12,7 +12,7 @@ from launch.substitutions import Command
 sys.path.append(os.path.join(get_package_share_directory("volleyball_robot"), 'launch'))
 from get_params import *
 
-# 相机参数文件路径（realsense + usb_camera 共用）
+# 相机参数文件路径（realsense）
 camera_params_path = os.path.join(
     get_package_share_directory("volleyball_robot"),
     "config",
@@ -52,10 +52,6 @@ def get_realsense_camera_launch():
 
 def generate_launch_description():
     ld = LaunchDescription()
-
-    # 加载相机参数（realsense + usb_camera）
-    with open(camera_params_path, "r") as f:
-        camera_params = yaml.safe_load(f)
 
     # ============================================================
     # Realsense 相机

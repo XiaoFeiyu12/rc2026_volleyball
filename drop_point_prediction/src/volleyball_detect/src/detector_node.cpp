@@ -213,7 +213,6 @@ void DetectorNode::rgbd_img_callback(const sensor_msgs::msg::Image::ConstSharedP
 			ball_msg.x = volleyball.x_;
 			ball_msg.y = volleyball.y_;
 			ball_msg.z = volleyball.z_;
-			ball_msg.radius = volleyball.radius_3d_;
 			ball_pub_->publish(ball_msg);
 		}
 		auto end = this->now();

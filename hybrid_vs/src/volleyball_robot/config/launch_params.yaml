@@ -1,6 +1,5 @@
 is_to_launch:
   realsense_camera: true
-  usb_camera: false
   robot_description: true
   detector_node: true
   ibvs_controller_node: true
