@@ -25,14 +25,14 @@
  *******************************************************************************/
 typedef struct _robot_msg_
 {
-  uint8_t header_;
-  uint8_t mode_;
-  uint8_t state_;
-  float x_;
-  float y_;
-  float self_pitch_;
-  uint8_t my_xor_;
-  uint8_t tail_;
+	uint8_t header_;
+	uint8_t mode_;
+	uint8_t state_;
+	float x_;
+	float y_;
+	float self_pitch_;
+	uint8_t my_xor_;
+	uint8_t tail_;
 } RobotMsg;
 
 /*******************************************************************************
@@ -50,15 +50,15 @@ typedef struct _robot_msg_
  *******************************************************************************/
 typedef struct _plan_msg_
 {
-  uint8_t header_;
-  uint8_t cmd_;
-  uint16_t len_;
-  float x_;
-  float y_;
-  uint8_t is_hit_;
-  float landing_time_;
-  uint8_t my_xor_;
-  uint8_t tail_;
+	uint8_t header_;
+	uint8_t cmd_;
+	uint16_t len_;
+	float x_;
+	float y_;
+	uint8_t is_hit_;
+	float landing_time_;
+	uint8_t my_xor_;
+	uint8_t tail_;
 } PlanMsg;
 
 /*******************************************************************************
@@ -67,8 +67,8 @@ typedef struct _plan_msg_
  *******************************************************************************/
 union RobotArray
 {
-  RobotMsg msg_;
-  uint8_t array_[sizeof(RobotMsg)];
+	RobotMsg msg_;
+	uint8_t array_[sizeof(RobotMsg)];
 };
 
 /*******************************************************************************
@@ -77,9 +77,9 @@ union RobotArray
  *******************************************************************************/
 union PlanArray
 {
-  PlanMsg msg_;
-  uint8_t array_[sizeof(PlanMsg)];
+	PlanMsg msg_;
+	uint8_t array_[sizeof(PlanMsg)];
 };
 
 #pragma pack()
-#endif  // SERIAL_PACKET_H
+#endif	// SERIAL_PACKET_H
