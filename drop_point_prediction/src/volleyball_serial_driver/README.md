@@ -8,24 +8,18 @@
 | - | - | - | - |
 | 0 | uint8 | 0xAA | 包头 |
 | 1 | uint8 | mode | 执行模式 |
-| 2 | uint8 | state | 接球模式下的阶段反馈 |
-| 3-6 | float32 | x | 机器人位置，单位m |
-| 7-10 | float32 | y | - |
-| 11-14 | float32 | pitch | 机器人delta机械臂俯仰角，单位弧度|
-| 15 | uint8 | xor | 异或校验位 |
-| 16 | uint8 | 0x55 | 包尾 |
+| 2-5 | float32 | x | 机器人位置，单位m |
+| 6-9 | float32 | y | - |
+| 10-13| float32 | yaw | 机器人朝向航向角，单位弧度|
+| 14-17 | float32 | pitch | 机器人delta机械臂俯仰角，单位弧度|
+| 18 | uint8 | xor | 异或校验位 |
+| 19 | uint8 | 0x55 | 包尾 |
 
 ### 枚举说明
 `mode` 说明：
 - 0 IDLE 待机等待指示
 - 1 REMOTE 遥控接管中
 - 2 SELF 自主接球中
-
-`state` 说明：
-- 0 waiting_plan 等待机械臂轨迹和机器人目标位置
-- 1 received_plan 接收到规划
-- 2 catching 自主接球中
-- 3 over 结束接球
 
 ## planArray - TX 发送内容
 由于实际有多个命令：移动规划,这里先列出总的框架：

@@ -29,6 +29,7 @@ typedef struct _robot_msg_
 	float x_;
 	float y_;
 	float self_yaw_;
+	float self_pitch_;
 	uint8_t my_xor_;
 	uint8_t tail_;
 } RobotMsg;
@@ -53,7 +54,7 @@ typedef struct _plan_msg_
 	uint16_t len_;
 	float x_;
 	float y_;
-	float self_yaw_;
+	uint8_t is_hit_;
 	float landing_time_;
 	uint8_t my_xor_;
 	uint8_t tail_;

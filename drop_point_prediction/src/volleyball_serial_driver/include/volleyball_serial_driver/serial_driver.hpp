@@ -15,7 +15,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 // Project
 #include "packet.h"
-#include "volleyball_interfaces/msg/ball.hpp"
 #include "volleyball_interfaces/msg/plan.hpp"
 #include "volleyball_interfaces/msg/robot_base.hpp"
 
@@ -40,14 +39,11 @@ private:
 	uint8_t get_content_xor(uint8_t *data_begin, int len);				  // 计算异或校验值
 	void robot_callback();												  // 发布机器人位姿与TF的定时回调
 	void plan_callback(volleyball_interfaces::msg::Plan::SharedPtr msg);  // 规划消息订阅回调
-	void ball_callback(volleyball_interfaces::msg::Ball::SharedPtr msg);
 
 	/*@brief 串口相关变量*/
 	bool is_open_ = false;
 	bool is_read_ = false;
 	bool has_new_plan_ = false;
-	bool has_ball_depth_ = false;
-	float latest_ball_depth_ = 1000.0f;
 	std::string *dev_name_;
 	std::thread serial_read_thread_;
 	SerialPortConfig *port_config_;
@@ -75,7 +71,6 @@ private:
 	rclcpp::Subscription<volleyball_interfaces::msg::Plan>::SharedPtr plan_sub_;
 	rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_tracker_client_;
 	rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr reset_planner_client_;
-	rclcpp::Subscription<volleyball_interfaces::msg::Ball>::SharedPtr ball_sub_;
 	volleyball_interfaces::msg::Plan latest_plan_;
 
 	uint8_t last_mode_ = 0;	 // 上一次下位机模式，用于检测模式切换
