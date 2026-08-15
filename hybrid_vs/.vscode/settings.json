@@ -1,0 +1,24 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/usr/local/python",
+        "/usr/local/python/python3",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/usr/local/python",
+        "/usr/local/python/python3",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.formatting": "default",
+    
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+    },
+
+
+    "editor.formatOnSave": true,
+}

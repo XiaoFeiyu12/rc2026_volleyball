@@ -136,7 +136,8 @@ void SerialDriverNode::serial_read_thread()
 					uint8_t tail = robot_data[robot_data.size() - 1];
 					uint8_t my_xor = robot_data[robot_data.size() - 2];
 
-					if (tail == 0x55 && my_xor == SerialDriverNode::get_content_xor(&robot_data[1], robot_data.size() - 3))
+					if (tail == 0x55 &&
+						my_xor == SerialDriverNode::get_content_xor(&robot_data[1], robot_data.size() - 3))
 					{
 						memcpy(robot_array_ptr_->array_, robot_data.data(), sizeof(robot_array_ptr_->array_));
 						is_read_ = true;
@@ -192,10 +193,11 @@ void SerialDriverNode::serial_write_callback()
 		plan_array_ptr_->msg_.y_ = latest_plan_.y;
 		plan_array_ptr_->msg_.is_hit_ = 0;
 		plan_array_ptr_->msg_.landing_time_ = latest_plan_.landing_time - timestamp_offset_;  // 减去传输延迟
-		plan_array_ptr_->msg_.my_xor_ = get_content_xor(&plan_array_ptr_->array_[1], sizeof(plan_array_ptr_->array_) - 3);
+		plan_array_ptr_->msg_.my_xor_ =
+			get_content_xor(&plan_array_ptr_->array_[1], sizeof(plan_array_ptr_->array_) - 3);
 		plan_array_ptr_->msg_.tail_ = 0x55;
 		serial_write(plan_array_ptr_->array_, sizeof(plan_array_ptr_->array_));
-		RCLCPP_INFO(this->get_logger(), "下位机发布规划:dx:%.1f,dy:.%1f", latest_plan_.x, latest_plan_.y);
+		RCLCPP_INFO(this->get_logger(), "下位机发布规划:x:%.1f,y:.%1f", latest_plan_.x, latest_plan_.y);
 		has_new_plan_ = false;
 	}
 }
@@ -211,13 +213,24 @@ void SerialDriverNode::robot_callback()
 		{
 			// 从下位机获取delta机械臂俯仰角,通过JointState发布TF
 			double pitch = robot_array_ptr_->msg_.self_pitch_;
+			double yaw = robot_array_ptr_->msg_.self_yaw_;
 
 			RCLCPP_DEBUG(this->get_logger(), "x:%05.2f/y:%05.2f/self_yaw:%05.2f/self_pitch:%05.2f,mode:%d",
 						 robot_array_ptr_->msg_.x_, robot_array_ptr_->msg_.y_, robot_array_ptr_->msg_.self_yaw_,
 						 robot_array_ptr_->msg_.self_pitch_, robot_array_ptr_->msg_.mode_);
 
-			// 发布delta_arm_joint关节状态,robot_state_publisher根据URDF自动发布base_link->delta_arm_link的TF
-			// URDF中已定义静态偏移: xyz="0.051 0 0.191" rpy="-3.1416 0 0", joint axis="0 1 0"(绕Y轴俯仰)
+			// 发布TF
+			geometry_msgs::msg::TransformStamped t;
+			t.header.stamp = this->now();
+			t.header.frame_id = odom_frame_id_;
+			t.child_frame_id = base_link_frame_id_;
+			t.transform.translation.x = 0;
+			t.transform.translation.y = 0;
+			tf2::Quaternion q;
+			q.setRPY(odom2base_roll_, odom2base_pitch_, odom2base_yaw_ + yaw);
+			t.transform.rotation = tf2::toMsg(q);
+			tf_broadcaster_->sendTransform(t);
+			// 发布delta_arm_joint关节状态
 			sensor_msgs::msg::JointState joint_state;
 			joint_state.header.stamp = this->now();
 			joint_state.name = {"delta_arm_joint"};
@@ -279,7 +292,6 @@ void SerialDriverNode::plan_callback(volleyball_interfaces::msg::Plan::SharedPtr
 	latest_plan_ = *msg;
 	has_new_plan_ = true;
 }
-
 
 uint8_t SerialDriverNode::get_content_xor(uint8_t *data_begin, int len)
 {
