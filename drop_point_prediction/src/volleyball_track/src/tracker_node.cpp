@@ -20,7 +20,7 @@ TrackerNode::TrackerNode() : Node("tracker_node")
 		{
 			fx_ = msg->k[0];
 			fy_ = msg->k[4];
-			camera_info_received = true;
+			camera_info_received_ = true;
 			try_init_kf();
 		});
 
@@ -69,8 +69,8 @@ void TrackerNode::try_init_kf()
 	double selfcheck_time_thres = this->get_parameter("selfcheck_time_thres").as_double();
 
 	// 初始化卡尔曼滤波器
-	mm_ctx = std::make_shared<MeasureModelContext>();
-	auto mm = make_position_3d(sigma_pixel, sigma_depth_gain, sigma_depth_const, fx_, fy_, mm_ctx);
+	mm_ctx_ = std::make_shared<MeasureModelContext>();
+	auto mm = make_position_3d(sigma_pixel, sigma_depth_gain, sigma_depth_const, fx_, fy_, mm_ctx_);
 	auto pm = make_linear_drag_3d(Q_sigma_xy_min, Q_sigma_xy_max, Q_sigma_z_min, Q_sigma_z_max, k, m, g);
 	Eigen::MatrixXd P0 = Eigen::MatrixXd::Identity(6, 6);
 	auto ekf = std::make_unique<Ekf>(P0, std::move(pm), std::move(mm));
@@ -121,7 +121,7 @@ void TrackerNode::try_init_kf()
 	ball_marker_.color.g = 1.0;
 
 	last_time_ = this->now();
-	lost_selfcheck_time_thres = selfcheck_time_thres;
+	lost_self_check_time_thres_ = selfcheck_time_thres;
 	initialing_ = false;
 
 	RCLCPP_INFO(this->get_logger(), "tracker_node初始化完成");
@@ -139,14 +139,14 @@ void TrackerNode::ball_callback(const volleyball_interfaces::msg::Ball::SharedPt
 	double dt = (now - last_time_).seconds();
 	last_time_ = now;
 
-	mm_ctx->pos_in_camera = Eigen::Vector3d(msg->x, msg->y, msg->z);
+	mm_ctx_->pos_in_camera_ = Eigen::Vector3d(msg->x, msg->y, msg->z);
 
 	try
 	{
 		auto tf = tf2_buffer_->lookupTransform(world_frame_, msg->header.frame_id, tf2::TimePointZero);
 		Eigen::Quaterniond q(tf.transform.rotation.w, tf.transform.rotation.x, tf.transform.rotation.y,
 							 tf.transform.rotation.z);
-		mm_ctx->camera2odom_rot = q.toRotationMatrix();
+		mm_ctx_->camera2odom_rot_ = q.toRotationMatrix();
 	}
 	catch (const tf2::TransformException &ex)
 	{
@@ -195,7 +195,7 @@ void TrackerNode::ball_lost_selfcheck_timer_callback()
 {
 	auto now = this->now();
 	double dt = (now - last_time_).seconds();
-	if (dt > lost_selfcheck_time_thres && tracker_->get_state() != Tracker::TRACK_STATE_IDLE)
+	if (dt > lost_self_check_time_thres_ && tracker_->get_state() != Tracker::TRACK_STATE_IDLE)
 	{
 		tracker_->predict_only(dt);
 		last_time_ = now;

@@ -19,9 +19,9 @@ namespace volleyball
  ****************************************************************/
 struct ProcessModel
 {
-	std::function<Eigen::VectorXd(const Eigen::VectorXd &, double)> f;
-	std::function<Eigen::MatrixXd(const Eigen::VectorXd &, double)> Q;
-	std::function<Eigen::MatrixXd(const Eigen::VectorXd &, double)> jacobian_f;
+	std::function<Eigen::VectorXd(const Eigen::VectorXd &, double)> f_;
+	std::function<Eigen::MatrixXd(const Eigen::VectorXd &, double)> Q_;
+	std::function<Eigen::MatrixXd(const Eigen::VectorXd &, double)> jacobian_f_;
 };
 
 /****************************************************************

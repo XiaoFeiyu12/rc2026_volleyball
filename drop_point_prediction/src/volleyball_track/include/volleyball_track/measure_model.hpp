@@ -15,15 +15,15 @@ namespace volleyball
 
 struct MeasureModel
 {
-	std::function<Eigen::VectorXd(const Eigen::VectorXd &)> h;
-	std::function<Eigen::MatrixXd(const Eigen::VectorXd &)> R;
-	std::function<Eigen::MatrixXd(const Eigen::VectorXd &)> jacobian_h;
+	std::function<Eigen::VectorXd(const Eigen::VectorXd &)> h_;
+	std::function<Eigen::MatrixXd(const Eigen::VectorXd &)> R_;
+	std::function<Eigen::MatrixXd(const Eigen::VectorXd &)> jacobian_h_;
 };
 
 struct MeasureModelContext
 {
-	Eigen::Vector3d pos_in_camera = Eigen::Vector3d::Zero();
-	Eigen::Matrix3d camera2odom_rot = Eigen::Matrix3d::Identity();
+	Eigen::Vector3d pos_in_camera_ = Eigen::Vector3d::Zero();
+	Eigen::Matrix3d camera2odom_rot_ = Eigen::Matrix3d::Identity();
 };
 
 // ===================================================================
@@ -49,9 +49,9 @@ inline MeasureModel make_position_3d(int sigma_pixel, double sigma_depth_gain, d
 	{
 		Eigen::MatrixXd R_mat, R_xyz = Eigen::MatrixXd::Zero(3, 3);
 		Eigen::MatrixXd J = Eigen::MatrixXd::Zero(3, 3);
-		double cam_x = ctx->pos_in_camera[0];
-		double cam_y = ctx->pos_in_camera[1];
-		double cam_z = ctx->pos_in_camera[2];
+		double cam_x = ctx->pos_in_camera_[0];
+		double cam_y = ctx->pos_in_camera_[1];
+		double cam_z = ctx->pos_in_camera_[2];
 		// clang-format off
         J << cam_z / fx, 0.0 , cam_x / cam_z,
              0.0, cam_z / fy , cam_y / cam_z,
@@ -63,7 +63,7 @@ inline MeasureModel make_position_3d(int sigma_pixel, double sigma_depth_gain, d
 		diag_vec << sigma_u * sigma_u, sigma_v * sigma_v, sigma_depth * sigma_depth;
 		Eigen::Matrix3d R_rpy = diag_vec.asDiagonal();
 		R_xyz = J * R_rpy * J.transpose();
-		auto camera2odom_rot = ctx->camera2odom_rot;
+		auto camera2odom_rot = ctx->camera2odom_rot_;
 		R_mat = camera2odom_rot * R_xyz * camera2odom_rot.transpose();
 		return R_mat;
 	};

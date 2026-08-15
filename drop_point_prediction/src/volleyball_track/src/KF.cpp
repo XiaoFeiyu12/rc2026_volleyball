@@ -37,10 +37,10 @@ void Ekf::set_state(const Eigen::VectorXd &x0)
 Eigen::VectorXd Ekf::predict(double dt)
 {
 	// 更新雅可比矩阵与噪声矩阵
-	F_ = pm_.jacobian_f(x_post_, dt);
-	Q_ = pm_.Q(x_post_, dt);
+	F_ = pm_.jacobian_f_(x_post_, dt);
+	Q_ = pm_.Q_(x_post_, dt);
 	// 预测状态
-	x_pred_ = pm_.f(x_post_, dt);
+	x_pred_ = pm_.f_(x_post_, dt);
 	// 预测协方差：P = F * P * F^T + Q
 	P_pred_ = F_ * P_post_ * F_.transpose() + Q_;
 
@@ -57,13 +57,13 @@ Eigen::VectorXd Ekf::predict(double dt)
 Eigen::VectorXd Ekf::update(const Eigen::VectorXd &z)
 {
 	// 更新观测雅可比与噪声矩阵
-	H_ = mm_.jacobian_h(x_pred_);
-	R_ = mm_.R(z);
+	H_ = mm_.jacobian_h_(x_pred_);
+	R_ = mm_.R_(z);
 	// 卡尔曼增益：K = P * H^T * (H*P*H^T + R)^(-1)
 	Eigen::MatrixXd S = (H_ * P_pred_ * H_.transpose() + R_);
 
 	// 进行马式距离检测是否异常
-	Eigen::VectorXd innovation = z - mm_.h(x_pred_);  // 3D = 3D - h(6D)
+	Eigen::VectorXd innovation = z - mm_.h_(x_pred_);  // 3D = 3D - h(6D)
 	Eigen::MatrixXd S_inv = S.ldlt().solve(Eigen::MatrixXd::Identity(S.rows(), S.cols()));
 	double maha_distance = innovation.transpose() * S_inv * innovation;
 	RCLCPP_DEBUG(rclcpp::get_logger("tracker_node"), "马式距离:%f", maha_distance);
@@ -154,7 +154,7 @@ Eigen::VectorXd Ukf::predict(double dt)
 	/*传播sigma点*/
 	for (int i = 0; i < sigma_num_; i++)
 	{
-		sigma_points_pred_[i] = pm_.f(sigma_points_post_[i], dt);
+		sigma_points_pred_[i] = pm_.f_(sigma_points_post_[i], dt);
 	}
 	/*取加权平均值作为预测值*/
 	x_pred_.setZero();
@@ -168,7 +168,7 @@ Eigen::VectorXd Ukf::predict(double dt)
 		Eigen::VectorXd error = sigma_points_pred_[i] - x_pred_;
 		P_pred_ += Wc_[i] * error * error.transpose();
 	}
-	P_pred_ += pm_.Q(x_post_, dt);
+	P_pred_ += pm_.Q_(x_post_, dt);
 
 	x_post_ = x_pred_;
 	P_post_ = P_pred_;
@@ -187,7 +187,7 @@ Eigen::VectorXd Ukf::update(const Eigen::VectorXd &z)
 	z_pri_mean_.setZero();
 	for (int i = 0; i < sigma_num_; i++)
 	{
-		zeta[i] = mm_.h(sigma_points_pred_[i]);
+		zeta[i] = mm_.h_(sigma_points_pred_[i]);
 		z_pri_mean_ += Wm_[i] * zeta[i];
 	}
 	/*计算新息协方差和交叉协方差*/
@@ -201,7 +201,7 @@ Eigen::VectorXd Ukf::update(const Eigen::VectorXd &z)
 		S += Wc_[i] * error * error.transpose();
 		Pxz += Wc_[i] * (sigma_points_pred_[i] - x_pred_) * error.transpose();
 	}
-	S += mm_.R(z);
+	S += mm_.R_(z);
 	/*计算卡尔曼增益*/
 	Eigen::MatrixXd K = Pxz * S.ldlt().solve(Eigen::MatrixXd::Identity(S.rows(), S.cols()));
 	/*更新*/

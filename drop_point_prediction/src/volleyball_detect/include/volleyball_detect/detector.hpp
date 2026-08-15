@@ -34,11 +34,11 @@ namespace volleyball
  *******************************************************************************/
 typedef struct _box_
 {
-	cv::Rect box;
-	float confidence;
-	short class_id;
-	float cx;
-	float cy;
+	cv::Rect box_;
+	float confidence_;
+	short class_id_;
+	float cx_;
+	float cy_;
 } DetectionBox;
 
 /*******************************************************************************
@@ -51,12 +51,12 @@ typedef struct _box_
  *******************************************************************************/
 typedef struct _ball_
 {
-	float x;
-	float y;
-	float z;
-	float radius_3d = 0.102;
-	float confidence = 0.0;
-	uint8_t position_type = 0;	// 0=depth , 1=geometry
+	float x_;
+	float y_;
+	float z_;
+	float radius_3d_ = 0.102;
+	float confidence_ = 0.0;
+	uint8_t position_type_ = 0;	// 0=depth , 1=geometry
 } Ball;
 
 /****************************************************************

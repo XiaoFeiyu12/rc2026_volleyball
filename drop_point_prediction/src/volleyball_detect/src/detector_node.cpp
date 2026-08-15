@@ -210,10 +210,10 @@ void DetectorNode::rgbd_img_callback(const sensor_msgs::msg::Image::ConstSharedP
 		{
 			Ball volleyball = detector_->ball_list_.front();
 			ball_msg.header.frame_id = camera_frame_id_;
-			ball_msg.x = volleyball.x;
-			ball_msg.y = volleyball.y;
-			ball_msg.z = volleyball.z;
-			ball_msg.radius = volleyball.radius_3d;
+			ball_msg.x = volleyball.x_;
+			ball_msg.y = volleyball.y_;
+			ball_msg.z = volleyball.z_;
+			ball_msg.radius = volleyball.radius_3d_;
 			ball_pub_->publish(ball_msg);
 		}
 		auto end = this->now();
@@ -233,11 +233,11 @@ void DetectorNode::rgbd_img_callback(const sensor_msgs::msg::Image::ConstSharedP
 			{
 				const auto &best_box = *std::max_element(
 					detector_->detection_box_list_.begin(), detector_->detection_box_list_.end(),
-					[](const DetectionBox &a, const DetectionBox &b) { return a.confidence < b.confidence; });
-				cv::circle(rgb_show, cv::Point(static_cast<int>(best_box.cx), static_cast<int>(best_box.cy)), 5,
+					[](const DetectionBox &a, const DetectionBox &b) { return a.confidence_ < b.confidence_; });
+				cv::circle(rgb_show, cv::Point(static_cast<int>(best_box.cx_), static_cast<int>(best_box.cy_)), 5,
 						   cv::Scalar(0, 0, 255), 2);
 				cv::line(rgb_show, cv::Point(ppx_, ppy_),
-						 cv::Point(static_cast<int>(best_box.cx), static_cast<int>(best_box.cy)), cv::Scalar(255, 0, 0),
+						 cv::Point(static_cast<int>(best_box.cx_), static_cast<int>(best_box.cy_)), cv::Scalar(255, 0, 0),
 						 2);
 			}
 			sensor_msgs::msg::Image::SharedPtr detection_result_msg =

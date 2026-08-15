@@ -46,10 +46,10 @@ private:
 	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
 	rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_tracker_srv_;
 
-	std::shared_ptr<MeasureModelContext> mm_ctx;
+	std::shared_ptr<MeasureModelContext> mm_ctx_;
 	bool kf_initialized_ = false;
 	bool initialing_ = false;
-	bool camera_info_received = false;
+	bool camera_info_received_ = false;
 	rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
 	double fx_, fy_;
 	std::unique_ptr<Tracker> tracker_;
@@ -58,7 +58,7 @@ private:
 	std::shared_ptr<tf2_ros::Buffer> tf2_buffer_;
 	std::shared_ptr<tf2_ros::TransformListener> tf2_listener_;
 
-	double lost_selfcheck_time_thres;  // 丢检自检阈值
+	double lost_self_check_time_thres_;  // 丢检自检阈值
 
 	void try_init_kf();
 	void ball_callback(const volleyball_interfaces::msg::Ball::SharedPtr msg);	   // 球检测回调
