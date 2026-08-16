@@ -118,7 +118,7 @@ void IbvsControllerNode::ball_callback(const Ball::SharedPtr msg)
 
 	PidCamera pid_msg;
 	pid_msg.dx = static_cast<float>(vy_cmd);
-	pid_msg.dy = static_cast<float>(vx_cmd);	// 放大以便下位机处理
+	pid_msg.dy = static_cast<float>(vx_cmd);
 
 	// 处理击球逻辑
 	if (pt_base.point.x < hit_offset_x_ && pt_base.point.x > 0.0 && std::abs(pt_base.point.y) < hit_offset_y_ &&
