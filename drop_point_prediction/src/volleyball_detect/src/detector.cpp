@@ -281,16 +281,27 @@ bool Detector::get_ball_pos_depth_img(Ball &volleyball, const DetectionBox &dete
 }
 
 /*****************************************************************
- * @brief 基于几何关系估算排球3D位置（小孔成像法）
+ * @brief 基于几何关系估算排球3D位置
  *****************************************************************/
 void Detector::get_ball_pos_geometry(Ball &volleyball, const DetectionBox &detect_box)
 {
-	float D = volleyball.radius_3d_ * 2;
-	float z1 = color_camera_intrin_.fx * D / detect_box.box_.width;
-	float z2 = color_camera_intrin_.fy * D / detect_box.box_.height;
-	float z = (z1 + z2) / 2;
-	float x = (detect_box.cx_ - color_camera_intrin_.ppx) * z / color_camera_intrin_.fx;
-	float y = (detect_box.cy_ - color_camera_intrin_.ppy) * z / color_camera_intrin_.fy;
+	float R = volleyball.radius_3d_;
+	float fx = color_camera_intrin_.fx;
+	float fy = color_camera_intrin_.fy;
+
+	// 取宽和高的像素半径
+	float r_w = detect_box.box_.width / 2.0f;
+	float r_h = detect_box.box_.height / 2.0f;
+
+	float z1 = std::sqrt(pow(fx * R / r_w, 2) + pow(R, 2));
+	float z2 = std::sqrt(pow(fy * R / r_h, 2) + pow(R, 2));
+
+	// 取长边防止裁减截断情况
+	float z = std::max(z1, z2);
+
+	// 反投影得到球心坐标
+	float x = (detect_box.cx_ - color_camera_intrin_.ppx) * z / fx;
+	float y = (detect_box.cy_ - color_camera_intrin_.ppy) * z / fy;
 
 	volleyball.x_ = x;
 	volleyball.y_ = y;
