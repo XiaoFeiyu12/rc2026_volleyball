@@ -73,16 +73,16 @@ B[RGB图像流] --> C[预处理] --> D[推理] --> E[后处理] --> F[筛选]
 
 计算深度：  
 $$
-\begin{align}
+\begin{aligned}
     z= d_{min} \cdot depth    
-\end{align}
+\end{aligned}  
 $$   
 得到坐标：  
 $$
-\begin{align}
+\begin{aligned}
     x=\frac{(x-c_x)z}{f_x}  \\
-    y=\frac{(y-c_y)z}{f_y}   
-\end{align}
+    y=\frac{(y-c_y)z}{f_y}     
+\end{aligned}
 $$   
 
 
@@ -90,29 +90,29 @@ $$
 
 随后可以得到相机光心到点$A$的方向向量
 $$
-\begin{align}
-    \vec{r} = norm(x,y,z)
-\end{align}
+\begin{aligned}
+    \vec{r} = \frac{(x,y,z)}{\lVert (x,y,z) \rVert}
+\end{aligned}
 $$
 最后设排球半径为$R$,球心位置可得：
 $$
-\begin{align}
+\begin{aligned}
     (x_b,y_b,z_b) = (x,y,z) + \vec{r} \cdot R
-\end{align}
+\end{aligned}
 $$
 
 当然整个过程需要剔除超出深度相机可用范围的或者缺陷深度为0的点，此外为避免以上情况以及深度图质量的情况，加入基本的几何法测距作为验证。由于检测框宽高往往不一致，故公式如下：
 
 $$
-\begin{align}
-    r_w &= width_{识别框} /2\\
-    r_h &= height_{识别框}  / 2 \\
+\begin{aligned}
+    r_w &= width_{\text{识别框}} /2\\
+    r_h &= height_{\text{识别框}}  / 2 \\
     z_w &=  \sqrt{(\frac{f_x \cdot R}{r_w})^2 + R^2} \\
     z_h &=  \sqrt{(\frac{f_y \cdot R}{r_h})^2 + R^2} \\
     z &= \frac{z_w+z_h}{2} \\
     x&=\frac{(x-c_x)z}{f_x}  \\
     y&=\frac{(y-c_y)z}{f_y}  
-\end{align}
+\end{aligned}
 $$
 
 虽然精度终究是比通过深度度估算差，但作为下限兜底验证还是可以的。

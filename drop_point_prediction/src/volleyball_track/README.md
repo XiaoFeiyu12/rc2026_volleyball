@@ -89,7 +89,7 @@ x_{k+1}|_k =
         0 \\
         0 \\
         0 \\
-        -\frac{g}{\beta}(\Delta-N)\\
+        -\frac{g}{\beta}(\Delta t-N)\\
         -gN
     \end{pmatrix} 
 $$
