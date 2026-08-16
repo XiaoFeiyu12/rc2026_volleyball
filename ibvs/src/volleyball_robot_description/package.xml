@@ -8,7 +8,7 @@ for volleyball_robot_description robot</p>
   </description>
   <author>TODO</author>
   <maintainer email="TODO@email.com" />
-  <license>BSD</license>
+  <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <!-- Runtime tools commonly used with description packages in ROS 2 -->

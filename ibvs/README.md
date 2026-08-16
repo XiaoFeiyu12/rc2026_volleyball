@@ -52,7 +52,7 @@ ibvs
 #### 1. 拉取仓库
 ```bash
 git clone https://github.com/XiaoFeiyu12/rc2026_volleyball.git
-cd rc2026_volleyball/hybrid_vs
+cd rc2026_volleyball/ibvs
 ```
 
 #### 2. 安装系统依赖
